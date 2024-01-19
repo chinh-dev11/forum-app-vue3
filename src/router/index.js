@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import PageHome from '@/components/PageHome.vue'
-import PageThreadShow from '@/components/PageThreadShow.vue'
-import PageNotFound from '@/components/PageNotFound.vue'
-import sourceData from '@/data.json'
+import PageHome from '@/views/PageHome.vue'
+import PageThreadShow from '@/views/PageThreadShow.vue'
+import PageNotFound from '@/views/PageNotFound.vue'
+import dataSource from '@/data.json'
 
 const routes = [
   { name: 'Home', path: '/', component: PageHome },
@@ -12,7 +12,7 @@ const routes = [
     component: PageThreadShow,
     props: true,
     beforeEnter (to, from, next) {
-      const threadExists = sourceData.threads.find(
+      const threadExists = dataSource.threads.find(
         (t) => t.id === to.params.id
       )
 

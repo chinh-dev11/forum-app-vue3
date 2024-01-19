@@ -1,5 +1,5 @@
 <script>
-import ThreadListItem from './ThreadListItem.vue'
+import ThreadListItem from '@/components/ThreadListItem.vue'
 
 export default {
   components: { ThreadListItem },

@@ -1,5 +1,5 @@
 <script>
-import ThreadList from './ThreadList.vue'
+import ThreadList from '@/components/ThreadList.vue'
 import dataSource from '@/data.json'
 
 export default {
