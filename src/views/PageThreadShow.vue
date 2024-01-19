@@ -13,17 +13,21 @@ export default {
   data () {
     return {
       threads: dataSource.threads,
+      posts: dataSource.posts,
       users: dataSource.users
     }
   },
   methods: {
     userById (userId) {
-      return this.users.find((user) => user.id === userId)
+      return this.users.find((u) => u.id === userId)
     }
   },
   computed: {
     thread () {
       return this.threads.find((t) => t.id === this.id)
+    },
+    threadPosts () {
+      return this.posts.filter((p) => p.threadId === this.id)
     }
   }
 }
@@ -41,7 +45,7 @@ export default {
         >3 replies by 3 contributors</span
       >
     </p>
-    <PostList :thread="thread"/>
+    <PostList :posts="threadPosts" />
   </div>
 </template>
 

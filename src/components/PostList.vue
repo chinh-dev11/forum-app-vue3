@@ -4,8 +4,8 @@ import PostListItem from '@/components/PostListItem.vue'
 export default {
   components: { PostListItem },
   props: {
-    thread: {
-      type: Object,
+    posts: {
+      type: Array,
       required: true
     }
   }
@@ -14,7 +14,7 @@ export default {
 
 <template>
     <div class="post-list">
-      <PostListItem v-for="postId in thread.posts" :key="postId" :postId="postId" />
+      <PostListItem v-for="post in posts" :key="post.id" :post="post" />
     </div>
 </template>
 

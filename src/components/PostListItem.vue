@@ -3,23 +3,19 @@ import dataSource from '@/data.json'
 
 export default {
   props: {
-    postId: {
-      type: String,
+    post: {
+      type: Object,
       required: true
     }
   },
   data () {
     return {
-      posts: dataSource.posts,
       users: dataSource.users
     }
   },
   methods: {
-    postById (postId) {
-      return this.posts.find((post) => post.id === postId)
-    },
     userById (userId) {
-      return this.users.find((user) => user.id === userId)
+      return this.users.find((u) => u.id === userId)
     }
   }
 }
@@ -28,21 +24,15 @@ export default {
 <template>
   <div class="post">
     <div class="user-info">
-      <a href="#" class="user-name">{{
-        userById(postById(postId).userId).name
-      }}</a>
+      <a href="#" class="user-name">{{ userById(post.userId).name }}</a>
       <a href="#">
-        <img
-          class="avatar-large"
-          :src="userById(postById(postId).userId).avatar"
-          alt=""
-        />
+        <img class="avatar-large" :src="userById(post.userId).avatar" alt="" />
       </a>
       <p class="desktop-only text-small">107 posts</p>
     </div>
     <div class="post-content">
       <div>
-        <p>{{ postById(postId).text }}</p>
+        <p>{{ post.text }}</p>
       </div>
       <a
         href="#"
@@ -53,7 +43,7 @@ export default {
       ></a>
     </div>
     <div class="post-date text-faded">
-      {{ postById(postId).publishedAt }}
+      {{ post.publishedAt }}
     </div>
   </div>
 </template>
