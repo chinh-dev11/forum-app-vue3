@@ -29,7 +29,7 @@ export default {
   <div class="thread">
     <div>
       <p>
-        <a href="thread.html">{{ thread.title }}</a>
+        <router-link :to="{name: 'ThreadShow', params: {id: thread.id}}">{{ thread.title }}</router-link>
       </p>
       <p class="text-faded text-xsmall">
         By <a href="profile.html">{{ userById(thread.userId).name }}</a
