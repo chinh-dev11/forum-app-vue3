@@ -14,12 +14,30 @@ export default {
     return {
       threads: dataSource.threads,
       posts: dataSource.posts,
-      users: dataSource.users
+      users: dataSource.users,
+      newPostText: 'default value'
     }
   },
   methods: {
     userById (userId) {
       return this.users.find((u) => u.id === userId)
+    },
+    addPost () {
+      const postId = 'aaaa-' + Math.random() // temp dev value (could also use a package to generate ids). In real world, value should be generated form DB.
+      const post = {
+        // edited: {},
+        publishedAt: Math.floor(Date.now() / 1000), // in secs.
+        text: this.newPostText,
+        // text: this.$refs.newPostTextInput.value, // to fix browser error: Assertion failed: Input argument is not an HTMLInputElement.
+        threadId: this.id,
+        userId: 'Miej9zSGMRZKDvMXzfxjVOyv3RF3',
+        id: postId
+      }
+
+      this.posts.push(post)
+      this.thread.posts.push(postId)
+
+      this.newPostText = ''
     }
   },
   computed: {
@@ -46,6 +64,41 @@ export default {
       >
     </p>
     <PostList :posts="threadPosts" />
+    <form action="" @submit.prevent="addPost">
+      <div class="form-group">
+        <label for="thread_title">Title:</label>
+        <input type="text" id="thread_title" class="form-input" name="title" />
+      </div>
+
+      <div class="form-group">
+        <label for="thread_content">Content:</label>
+        <!-- since 2-way binding uses input event, it causes an error on textarea element 'Assertion failed: Input argument is not an HTMLInputElement' -->
+        <textarea
+          v-model="newPostText"
+          id="thread_content"
+          class="form-input"
+          name="content"
+          rows="8"
+          cols="140"
+        ></textarea>
+        <!-- to fix the error 'Assertion failed: Input argument is not an HTMLInputElement' -->
+        <!-- <textarea
+          :value="newPostText"
+          ref="newPostTextInput"
+          id="thread_content"
+          class="form-input"
+          name="content"
+          rows="8"
+          cols="140"
+        /> -->
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-blue" type="submit" name="Publish">
+          Publish
+        </button>
+      </div>
+    </form>
   </div>
 </template>
 
