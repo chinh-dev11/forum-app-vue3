@@ -1,5 +1,6 @@
 <script>
 import dataSource from '@/data.json'
+import { dateFromNow, humanReadableDate } from '@/utils/date'
 
 export default {
   props: {
@@ -20,6 +21,12 @@ export default {
     },
     userById (userId) {
       return this.users.find((u) => u.id === userId)
+    },
+    diffForHumans (timestamp) {
+      return dateFromNow(timestamp)
+    },
+    humanFriendlyDate (timestamp) {
+      return humanReadableDate(timestamp)
     }
   }
 }
@@ -29,11 +36,16 @@ export default {
   <div class="thread">
     <div>
       <p>
-        <router-link :to="{name: 'ThreadShow', params: {id: thread.id}}">{{ thread.title }}</router-link>
+        <router-link :to="{ name: 'ThreadShow', params: { id: thread.id } }">{{
+          thread.title
+        }}</router-link>
       </p>
       <p class="text-faded text-xsmall">
         By <a href="profile.html">{{ userById(thread.userId).name }}</a
-        >, {{ thread.publishedAt }}.
+        >,
+        <span class="d-ib" :title="humanFriendlyDate(thread.publishedAt)">
+          {{ diffForHumans(thread.publishedAt) }}.
+        </span>
       </p>
     </div>
     <div class="activity">
@@ -43,13 +55,21 @@ export default {
         <p class="text-xsmall">
           <a href="profile.html">{{ userById(thread.userId).name }}</a>
         </p>
-        <p class="text-xsmall text-faded">{{ thread.publishedAt }}</p>
+        <p
+          class="text-xsmall text-faded"
+          :title="humanFriendlyDate(thread.publishedAt)"
+        >
+          {{ diffForHumans(thread.publishedAt) }}
+        </p>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.d-ib {
+  display: inline-block;
+}
 .thread-list .thread {
   display: flex;
   justify-content: space-between;
