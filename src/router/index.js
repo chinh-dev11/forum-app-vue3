@@ -3,9 +3,11 @@ import PageHome from '@/views/PageHome.vue'
 import PageThreadShow from '@/views/PageThreadShow.vue'
 import PageNotFound from '@/views/PageNotFound.vue'
 import dataSource from '@/data.json'
+import PageForum from '@/views/PageForum.vue'
 
 const routes = [
   { name: 'Home', path: '/', component: PageHome },
+  { name: 'Forum', path: '/forum/:id', component: PageForum, props: true },
   {
     name: 'ThreadShow',
     path: '/thread/:id',
