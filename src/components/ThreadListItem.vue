@@ -1,8 +1,9 @@
 <script>
 import dataSource from '@/data.json'
-import { dateFromNow, humanReadableDate } from '@/utils/date'
+import AppDate from '@/components/AppDate.vue'
 
 export default {
+  components: { AppDate },
   props: {
     thread: {
       type: Object,
@@ -21,12 +22,6 @@ export default {
     },
     userById (userId) {
       return this.users.find((u) => u.id === userId)
-    },
-    diffForHumans (timestamp) {
-      return dateFromNow(timestamp)
-    },
-    humanFriendlyDate (timestamp) {
-      return humanReadableDate(timestamp)
     }
   }
 }
@@ -43,9 +38,7 @@ export default {
       <p class="text-faded text-xsmall">
         By <a href="profile.html">{{ userById(thread.userId).name }}</a
         >,
-        <span class="d-ib" :title="humanFriendlyDate(thread.publishedAt)">
-          {{ diffForHumans(thread.publishedAt) }}.
-        </span>
+        <AppDate :timestamp="thread.publishedAt" />
       </p>
     </div>
     <div class="activity">
@@ -55,11 +48,8 @@ export default {
         <p class="text-xsmall">
           <a href="profile.html">{{ userById(thread.userId).name }}</a>
         </p>
-        <p
-          class="text-xsmall text-faded"
-          :title="humanFriendlyDate(thread.publishedAt)"
-        >
-          {{ diffForHumans(thread.publishedAt) }}
+        <p class="text-xsmall text-faded">
+          <AppDate :timestamp="thread.publishedAt" />
         </p>
       </div>
     </div>
@@ -67,9 +57,6 @@ export default {
 </template>
 
 <style scoped>
-.d-ib {
-  display: inline-block;
-}
 .thread-list .thread {
   display: flex;
   justify-content: space-between;

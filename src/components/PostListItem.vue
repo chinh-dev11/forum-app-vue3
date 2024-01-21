@@ -1,8 +1,9 @@
 <script>
 import dataSource from '@/data.json'
-import { dateFromNow, humanReadableDate } from '@/utils/date'
+import AppDate from '@/components/AppDate.vue'
 
 export default {
+  components: { AppDate },
   props: {
     post: {
       type: Object,
@@ -17,12 +18,6 @@ export default {
   methods: {
     userById (userId) {
       return this.users.find((u) => u.id === userId)
-    },
-    diffForHumans (timestamp) {
-      return dateFromNow(timestamp)
-    },
-    humanFriendlyDate (timestamp) {
-      return humanReadableDate(timestamp)
     }
   }
 }
@@ -49,8 +44,8 @@ export default {
         ><i class="fa fa-pencil"></i
       ></a>
     </div>
-    <div class="post-date text-faded" :title="humanFriendlyDate(post.publishedAt)">
-      <p>{{ diffForHumans(post.publishedAt) }}</p>
+    <div class="post-date text-faded">
+      <AppDate :timestamp="post.publishedAt" />
     </div>
   </div>
 </template>
