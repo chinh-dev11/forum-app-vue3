@@ -8,14 +8,9 @@ export default {
       required: true
     }
   },
-  data () {
-    return {
-      users: dataSource.users
-    }
-  },
   methods: {
     userById (userId) {
-      return this.users.find((u) => u.id === userId)
+      return dataSource.users.find((u) => u.id === userId)
     }
   }
 }

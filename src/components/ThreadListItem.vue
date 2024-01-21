@@ -8,18 +8,12 @@ export default {
       required: true
     }
   },
-  data () {
-    return {
-      posts: dataSource.posts,
-      users: dataSource.users
-    }
-  },
   methods: {
     postById (postId) {
-      return this.posts.find((p) => p.id === postId)
+      return dataSource.posts.find((p) => p.id === postId)
     },
     userById (userId) {
-      return this.users.find((u) => u.id === userId)
+      return dataSource.users.find((u) => u.id === userId)
     }
   }
 }
