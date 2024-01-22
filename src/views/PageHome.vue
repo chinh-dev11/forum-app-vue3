@@ -1,15 +1,10 @@
-<script>
-import dataSource from '@/data.json'
+<script setup>
 import CategoryList from '@/components/CategoryList.vue'
+import { useCategoriesStore } from '@/stores/CategoriesStore'
+import { storeToRefs } from 'pinia'
 
-export default {
-  components: { CategoryList },
-  data () {
-    return {
-      categories: dataSource.categories
-    }
-  }
-}
+// destructuring looses the store's reactivity.
+const { categories } = storeToRefs(useCategoriesStore()) // storeToRefs keeps reactivity of the store.
 </script>
 
 <template>
