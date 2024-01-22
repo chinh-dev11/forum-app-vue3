@@ -29,8 +29,6 @@ export default {
       }
 
       this.$store.dispatch('createPost', post)
-      // this.$store.state.posts.push(post) // set post
-      // this.thread.posts.push(post.id) // append post to thread
     }
   }
 }

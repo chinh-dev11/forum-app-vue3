@@ -5,7 +5,7 @@ export default createStore({
   state: dataSource,
   actions: {
     createPost (context, post) {
-      post.id = 'aaaa-' + Math.random() // temp dev value (could also use a package to generate ids). In real world, value should be generated form DB.
+      post.id = 'aaaa-' + Math.random() // temp dev value (could also use a package to generate ids). In real world, value should be generated from DB.
 
       context.commit('setPost', { post })
       context.commit('appendPostToThread', { postId: post.id, threadId: post.threadId })
