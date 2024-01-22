@@ -1,22 +1,25 @@
 <script>
 import dataSource from '@/data.json'
-import ForumList from '@/components/ForumList.vue'
+import CategoryList from '@/components/CategoryList.vue'
 
 export default {
-  components: { ForumList },
+  components: { CategoryList },
   data () {
     return {
-      forums: dataSource.forums
+      categories: dataSource.categories
     }
   }
 }
 </script>
 
 <template>
-    <h1>Welcome to the Forum</h1>
-    <div class="col-full">
-      <ForumList :forums="forums" />
-    </div>
+  <h1>Welcome to the Forum</h1>
+  <!--
+     category > forums
+        forum > threads
+            thread > posts
+   -->
+    <CategoryList :categories="categories" />
 </template>
 
 <style scoped></style>
