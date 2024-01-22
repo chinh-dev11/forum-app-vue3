@@ -1,5 +1,4 @@
 <script>
-import dataSource from '@/data.json'
 import ThreadList from '@/components/ThreadList.vue'
 
 export default {
@@ -12,10 +11,10 @@ export default {
   },
   computed: {
     forum () {
-      return dataSource.forums.find(({ id }) => id === this.id)
+      return this.$store.state.forums.find(({ id }) => id === this.id)
     },
     threads () {
-      return dataSource.threads.filter((t) => t.forumId === this.forum.id)
+      return this.$store.state.threads.filter((t) => t.forumId === this.forum.id)
     }
   }
 }

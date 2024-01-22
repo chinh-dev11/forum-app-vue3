@@ -1,5 +1,4 @@
 <script>
-import dataSource from '@/data.json'
 import ForumList from '@/components/ForumList.vue'
 
 export default {
@@ -12,10 +11,10 @@ export default {
   },
   computed: {
     category () {
-      return dataSource.categories.find((category) => category.id === this.id)
+      return this.$store.state.categories.find((category) => category.id === this.id)
     },
     forumsForCategory () {
-      return dataSource.forums.filter(
+      return this.$store.state.forums.filter(
         ({ categoryId }) => categoryId === this.id
       )
     }

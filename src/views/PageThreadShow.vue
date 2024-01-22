@@ -1,5 +1,4 @@
 <script>
-import dataSource from '@/data.json'
 import PostList from '@/components/PostList.vue'
 import PostEditor from '@/components/PostEditor.vue'
 
@@ -11,16 +10,17 @@ export default {
       required: true
     }
   },
-  data () {
-    return {
-      threads: dataSource.threads,
-      posts: dataSource.posts,
-      users: dataSource.users
+  computed: {
+    thread () {
+      return this.$store.state.threads.find((t) => t.id === this.id)
+    },
+    threadPosts () {
+      return this.$store.state.posts.filter((p) => p.threadId === this.id)
     }
   },
   methods: {
     userById (userId) {
-      return this.users.find((u) => u.id === userId)
+      return this.$store.state.users.find((u) => u.id === userId)
     },
     addPost (eventData) {
       const post = {
@@ -28,16 +28,8 @@ export default {
         threadId: this.id
       }
 
-      this.posts.push(post)
+      this.$store.state.posts.push(post)
       this.thread.posts.push(post.id)
-    }
-  },
-  computed: {
-    thread () {
-      return this.threads.find((t) => t.id === this.id)
-    },
-    threadPosts () {
-      return this.posts.filter((p) => p.threadId === this.id)
     }
   }
 }
@@ -48,7 +40,7 @@ export default {
     <h1>{{ thread.title }}</h1>
     <p>
       By <a href="#" class="link-unstyled">{{ userById(thread.userId).name }}</a
-      >, {{ thread.publishedAt }}.
+      >, <AppDate :timestamp="thread.publishedAt"/>
       <span
         style="float: right; margin-top: 2px"
         class="hide-mobile text-faded text-small"
