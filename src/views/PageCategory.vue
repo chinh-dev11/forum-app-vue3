@@ -14,8 +14,10 @@ export default {
     category () {
       return dataSource.categories.find((category) => category.id === this.id)
     },
-    categoryForums () {
-      return dataSource.forums.filter(f => f.categoryId === this.id)
+    forumsForCategory () {
+      return dataSource.forums.filter(
+        ({ categoryId }) => categoryId === this.id
+      )
     }
   }
 }
@@ -26,7 +28,7 @@ export default {
     <h1>{{ category.name }}</h1>
   </div>
   <ForumList
-    :forums="categoryForums"
+    :forums="forumsForCategory"
     :title="category.name"
     :category-id="category.id"
   />
