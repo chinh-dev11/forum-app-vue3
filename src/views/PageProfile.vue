@@ -1,10 +1,17 @@
 <script>
 import PostList from '@/components/PostList.vue'
 import UserProfileCard from '@/components/UserProfileCard.vue'
+import UserProfileCardEditor from '@/components/UserProfileCardEditor.vue'
 import { mapGetters } from 'vuex'
 
 export default {
-  components: { PostList, UserProfileCard },
+  components: { PostList, UserProfileCard, UserProfileCardEditor },
+  props: {
+    edit: {
+      type: Boolean,
+      default: false
+    }
+  },
   computed: {
     ...mapGetters({ user: 'authUser' })
   }
@@ -14,17 +21,8 @@ export default {
 <template>
   <div class="flex-grid">
     <div class="col-3 push-top">
-      <user-profile-card :user="user"/>
-
-      <p class="text-xsmall text-faded text-center">
-        Member since <app-date :timestamp="user.registeredAt" />, last visited
-        <app-date :timestamp="user.lastVisitAt" />
-      </p>
-
-      <div class="text-center">
-        <hr />
-        <a href="#" class="btn-green btn-small">Edit Profile</a>
-      </div>
+      <user-profile-card-editor v-if="edit" :user="user" />
+      <user-profile-card v-else :user="user" />
     </div>
 
     <div class="col-7 push-top">

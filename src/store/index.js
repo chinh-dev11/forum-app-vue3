@@ -23,6 +23,9 @@ export default createStore({
     }
   },
   actions: {
+    updateUser ({ commit }, user) {
+      commit('setUser', { user, userId: user.id })
+    },
     createPost (context, post) {
       post.id = 'aaaa-' + Math.random() // temp dev value (could also use a package to generate ids). In real world, value should be generated from DB.
 
@@ -31,6 +34,10 @@ export default createStore({
     }
   },
   mutations: {
+    setUser (state, { user, userId }) {
+      const userIndex = state.users.findIndex(({ id }) => id === userId)
+      state.users[userIndex] = user
+    },
     setPost (state, { post }) {
       state.posts.push(post)
     },

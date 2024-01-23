@@ -9,6 +9,7 @@ import PageProfile from '@/views/PageProfile.vue'
 
 const routes = [
   { name: 'Home', path: '/', component: PageHome },
+  { name: 'ProfileEdit', path: '/me/edit', component: PageProfile, props: { edit: true } }, // pass in 'edit' prop as boolean type (true/false) when visiting the route.
   { name: 'Profile', path: '/me', component: PageProfile },
   { name: 'Category', path: '/category/:id', component: PageCategory, props: true },
   { name: 'Forum', path: '/forum/:id', component: PageForum, props: true },
