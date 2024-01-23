@@ -7,7 +7,20 @@ export default createStore({
     authId: 'ALXhxjwgY9PinwNGHpfai6OWyDu2'
   },
   getters: {
-    authUser: state => state.users.find(({ id }) => id === state.authId)
+    authUser: state => {
+      const user = state.users.find(({ id }) => id === state.authId)
+
+      if (!user) return null
+
+      return {
+        ...user,
+        // 'get' acts as a property. e.g. user.posts
+        get posts () { return state.posts.filter(({ userId }) => userId === user.id) },
+        get postsCount () { return this.posts.length },
+        get threads () { return state.threads.filter(({ userId }) => userId === user.id) },
+        get threadsCount () { return this.threads.length }
+      }
+    }
   },
   actions: {
     createPost (context, post) {

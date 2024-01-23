@@ -1,19 +1,12 @@
 <script>
 import PostList from '@/components/PostList.vue'
+import UserProfileCard from '@/components/UserProfileCard.vue'
 import { mapGetters } from 'vuex'
 
 export default {
-  components: { PostList },
+  components: { PostList, UserProfileCard },
   computed: {
-    ...mapGetters({ user: 'authUser' }),
-    userPosts () {
-      return this.$store.state.posts.filter(({ userId }) => userId === this.user.id)
-    },
-    userThreads () {
-      return this.$store.state.threads.filter(
-        ({ userId }) => userId === this.user.id
-      )
-    }
+    ...mapGetters({ user: 'authUser' })
   }
 }
 </script>
@@ -21,41 +14,7 @@ export default {
 <template>
   <div class="flex-grid">
     <div class="col-3 push-top">
-      <div class="profile-card">
-        <p class="text-center">
-          <img
-            :src="user.avatar"
-            :alt="`${user.name} profile picture`"
-            class="avatar-xlarge"
-          />
-        </p>
-
-        <h1 class="title">{{ user.username }}</h1>
-
-        <p class="text-lead">{{ user.name }}</p>
-
-        <p class="text-justify">{{ user.bio || "No bio specified." }}</p>
-
-        <span class="online">{{ user.username }} is online</span>
-
-        <div class="stats">
-          <span
-            >{{ userPosts.length }} post{{ userPosts.length ? "s" : "" }}</span
-          >
-          <span
-            >{{ userThreads.length }} thread{{
-              userThreads.length ? "s" : ""
-            }}</span
-          >
-        </div>
-
-        <hr />
-
-        <p v-if="user.website" class="text-large text-center">
-          <i class="fa fa-globe"></i>
-          <a :href="user.website">{{ user.website }}</a>
-        </p>
-      </div>
+      <user-profile-card :user="user"/>
 
       <p class="text-xsmall text-faded text-center">
         Member since <app-date :timestamp="user.registeredAt" />, last visited
@@ -76,7 +35,7 @@ export default {
 
       <hr />
 
-      <post-list :posts="userPosts" />
+      <post-list :posts="user.posts" />
       <!-- <div class="activity-list">
         <div class="activity">
           <div class="activity-header">
@@ -110,4 +69,4 @@ export default {
   </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style scoped></style>
