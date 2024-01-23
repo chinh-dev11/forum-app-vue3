@@ -11,7 +11,6 @@ export default {
         // edited: {},
         text: this.text
         // text: this.$refs.textarea.value, // to fix browser error: Assertion failed: Input argument is not an HTMLInputElement.
-        // userId: 'Miej9zSGMRZKDvMXzfxjVOyv3RF3'
       }
 
       this.$emit('save', { post })
