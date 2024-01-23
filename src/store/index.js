@@ -2,7 +2,13 @@ import { createStore } from 'vuex'
 import dataSource from '@/data.json'
 
 export default createStore({
-  state: dataSource,
+  state: {
+    ...dataSource,
+    authId: '38St7Q8Zi2N1SPa5ahzssq9kbyp1'
+  },
+  getters: {
+    authUser: state => state.users.find(({ id }) => id === state.authId)
+  },
   actions: {
     createPost (context, post) {
       post.id = 'aaaa-' + Math.random() // temp dev value (could also use a package to generate ids). In real world, value should be generated from DB.
