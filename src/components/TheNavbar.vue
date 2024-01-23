@@ -25,7 +25,10 @@ export default {
     <nav class="navbar">
       <ul>
         <li class="navbar-user">
-          <a href="#">
+          <router-link
+            :to="{ name: 'Profile', params: { id: authUser.id } }"
+            href="#"
+          >
             <img
               class="avatar-small"
               :src="authUser.avatar"
@@ -39,7 +42,7 @@ export default {
                 alt=""
               />
             </span>
-          </a>
+          </router-link>
 
           <!-- dropdown menu -->
           <!-- add class "active-drop" to show the dropdown -->
