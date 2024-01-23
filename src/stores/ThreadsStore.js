@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import dataSource from '@/data.json'
 
-export const useCategoriesStore = defineStore('CategoriesStore', {
+export const useThreadsStore = defineStore('ThreadsStore', {
   state: () => ({
-    categories: dataSource.categories
+    threads: dataSource.threads
   }),
   getters: {},
   actions: {}

@@ -4,7 +4,7 @@ import { useCategoriesStore } from '@/stores/CategoriesStore'
 import { storeToRefs } from 'pinia'
 
 // destructuring looses the store's reactivity.
-const { categories } = storeToRefs(useCategoriesStore()) // storeToRefs keeps reactivity of the store.
+const { categories } = storeToRefs(useCategoriesStore()) // storeToRefs maintains the store's reactivity.
 </script>
 
 <template>

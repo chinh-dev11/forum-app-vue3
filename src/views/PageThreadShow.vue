@@ -3,6 +3,10 @@ import dataSource from '@/data.json'
 import PostList from '@/components/PostList.vue'
 import PostEditor from '@/components/PostEditor.vue'
 
+import { mapState, mapActions } from 'pinia'
+import { useThreadsStore } from '@/stores/ThreadsStore'
+import { usePostsStore } from '@/stores/PostsStore'
+
 export default {
   components: { PostList, PostEditor },
   props: {
@@ -13,12 +17,11 @@ export default {
   },
   data () {
     return {
-      threads: dataSource.threads,
-      posts: dataSource.posts,
       users: dataSource.users
     }
   },
   methods: {
+    ...mapActions(usePostsStore, ['createPost']),
     userById (userId) {
       return this.users.find((u) => u.id === userId)
     },
@@ -28,11 +31,12 @@ export default {
         threadId: this.id
       }
 
-      this.posts.push(post)
-      this.thread.posts.push(post.id)
+      this.createPost(post)
     }
   },
   computed: {
+    ...mapState(useThreadsStore, ['threads']),
+    ...mapState(usePostsStore, ['posts']),
     thread () {
       return this.threads.find((t) => t.id === this.id)
     },
