@@ -1,6 +1,4 @@
 <script>
-import dataSource from '@/data.json'
-
 export default {
   props: {
     thread: {
@@ -10,10 +8,10 @@ export default {
   },
   methods: {
     postById (postId) {
-      return dataSource.posts.find((p) => p.id === postId)
+      return this.$store.state.posts.find((p) => p.id === postId)
     },
     userById (userId) {
-      return dataSource.users.find((u) => u.id === userId)
+      return this.$store.state.users.find((u) => u.id === userId)
     }
   }
 }

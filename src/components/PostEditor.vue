@@ -7,14 +7,12 @@ export default {
   },
   methods: {
     save () {
-      const postId = 'aaaa-' + Math.random() // temp dev value (could also use a package to generate ids). In real world, value should be generated form DB.
       const post = {
         // edited: {},
         publishedAt: Math.floor(Date.now() / 1000), // in secs.
         text: this.text,
         // text: this.$refs.textarea.value, // to fix browser error: Assertion failed: Input argument is not an HTMLInputElement.
-        userId: 'Miej9zSGMRZKDvMXzfxjVOyv3RF3',
-        id: postId
+        userId: 'Miej9zSGMRZKDvMXzfxjVOyv3RF3'
       }
 
       this.$emit('save', { post })

@@ -25,9 +25,9 @@ export default {
 </script>
 
 <template>
-  <div :title="humanReadableDate()">
+  <span :title="humanReadableDate()">
     {{ dateFromNow() }}.
-  </div>
+  </span>
 </template>
 
 <style scoped></style>
