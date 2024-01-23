@@ -12,7 +12,7 @@ export default {
 </script>
 
 <template>
-  <CategoryList :categories="categories" />
+  <category-list :categories="categories" />
 </template>
 
 <style scoped></style>

@@ -28,7 +28,7 @@ export default {
   <div class="col-full push-top">
     <h1>{{ category.name }}</h1>
   </div>
-  <ForumList
+  <forum-list
     :forums="forumsForCategory"
     :title="category.name"
     :category-id="category.id"

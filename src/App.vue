@@ -8,7 +8,7 @@ export default {
 
 <template>
   <the-navbar />
-  <div class="containre"><router-view /></div>
+  <div class="container"><router-view /></div>
 </template>
 
 <style>
