@@ -9,10 +9,9 @@ export default {
     save () {
       const post = {
         // edited: {},
-        publishedAt: Math.floor(Date.now() / 1000), // in secs.
-        text: this.text,
+        text: this.text
         // text: this.$refs.textarea.value, // to fix browser error: Assertion failed: Input argument is not an HTMLInputElement.
-        userId: 'Miej9zSGMRZKDvMXzfxjVOyv3RF3'
+        // userId: 'Miej9zSGMRZKDvMXzfxjVOyv3RF3'
       }
 
       this.$emit('save', { post })

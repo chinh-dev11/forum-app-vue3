@@ -26,11 +26,13 @@ export default createStore({
     updateUser ({ commit }, user) {
       commit('setUser', { user, userId: user.id })
     },
-    createPost (context, post) {
+    createPost ({ commit, state }, post) {
       post.id = 'aaaa-' + Math.random() // temp dev value (could also use a package to generate ids). In real world, value should be generated from DB.
+      post.userId = state.authId
+      post.publishedAt = Math.floor(Date.now() / 1000) // in secs.
 
-      context.commit('setPost', { post })
-      context.commit('appendPostToThread', { postId: post.id, threadId: post.threadId })
+      commit('setPost', { post })
+      commit('appendPostToThread', { postId: post.id, threadId: post.threadId })
     }
   },
   mutations: {

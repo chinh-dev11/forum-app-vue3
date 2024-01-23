@@ -59,7 +59,7 @@ export default createRouter({
   scrollBehavior (to) {
     const scroll = {}
 
-    // check of meta... of a route is set.
+    // check of meta... property of a route is set.
     if (to.meta.toTop) scroll.top = 0
     if (to.meta.smoothScroll) scroll.behavior = 'smooth'
 
