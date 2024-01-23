@@ -11,7 +11,9 @@ export default {
   },
   computed: {
     category () {
-      return this.$store.state.categories.find((category) => category.id === this.id)
+      return this.$store.state.categories.find(
+        (category) => category.id === this.id
+      )
     },
     forumsForCategory () {
       return this.$store.state.forums.filter(

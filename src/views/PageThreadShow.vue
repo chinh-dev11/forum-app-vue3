@@ -38,8 +38,9 @@ export default {
   <div class="col-large push-top">
     <h1>{{ thread.title }}</h1>
     <p>
-      By <a href="#" class="link-unstyled">{{ userById(thread.userId).name }}</a
-      >, <AppDate :timestamp="thread.publishedAt"/>
+      By
+      <a href="#" class="link-unstyled">{{ userById(thread.userId).name }}</a
+      >, <AppDate :timestamp="thread.publishedAt" />
       <span
         style="float: right; margin-top: 2px"
         class="hide-mobile text-faded text-small"
