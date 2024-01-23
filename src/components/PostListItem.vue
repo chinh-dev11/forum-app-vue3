@@ -36,7 +36,7 @@ export default {
       ></a>
     </div>
     <div class="post-date text-faded">
-      <AppDate :timestamp="post.publishedAt" />
+      <app-date :timestamp="post.publishedAt" />
     </div>
   </div>
 </template>

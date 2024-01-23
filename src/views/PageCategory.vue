@@ -11,7 +11,9 @@ export default {
   },
   computed: {
     category () {
-      return this.$store.state.categories.find((category) => category.id === this.id)
+      return this.$store.state.categories.find(
+        (category) => category.id === this.id
+      )
     },
     forumsForCategory () {
       return this.$store.state.forums.filter(
@@ -26,7 +28,7 @@ export default {
   <div class="col-full push-top">
     <h1>{{ category.name }}</h1>
   </div>
-  <ForumList
+  <forum-list
     :forums="forumsForCategory"
     :title="category.name"
     :category-id="category.id"

@@ -12,13 +12,7 @@ export default {
 </script>
 
 <template>
-  <h1>Welcome to the Forum</h1>
-  <!--
-     category > forums
-        forum > threads
-            thread > posts
-   -->
-    <CategoryList :categories="categories" />
+  <category-list :categories="categories" />
 </template>
 
 <style scoped></style>

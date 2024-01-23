@@ -14,7 +14,9 @@ export default {
       return this.$store.state.forums.find(({ id }) => id === this.id)
     },
     threads () {
-      return this.$store.state.threads.filter((t) => t.forumId === this.forum.id)
+      return this.$store.state.threads.filter(
+        (t) => t.forumId === this.forum.id
+      )
     }
   }
 }
@@ -35,7 +37,7 @@ export default {
       <div class="forum-list"></div>
     </div>
   </div>
-  <ThreadList :threads="threads" />
+  <thread-list :threads="threads" />
 </template>
 
 <style lang="scss" scoped></style>
