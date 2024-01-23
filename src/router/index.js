@@ -9,9 +9,24 @@ import PageProfile from '@/views/PageProfile.vue'
 
 const routes = [
   { name: 'Home', path: '/', component: PageHome },
-  { name: 'ProfileEdit', path: '/me/edit', component: PageProfile, props: { edit: true } }, // pass in 'edit' prop as boolean type (true/false) when visiting the route.
-  { name: 'Profile', path: '/me', component: PageProfile },
-  { name: 'Category', path: '/category/:id', component: PageCategory, props: true },
+  {
+    name: 'ProfileEdit',
+    path: '/me/edit',
+    component: PageProfile,
+    props: { edit: true } // pass in 'edit' prop as boolean type (true/false).
+  },
+  {
+    name: 'Profile',
+    path: '/me',
+    component: PageProfile,
+    meta: { toTop: true, smothScroll: true } // scroll top smoothly. e.g. in case when editing profile.
+  },
+  {
+    name: 'Category',
+    path: '/category/:id',
+    component: PageCategory,
+    props: true
+  },
   { name: 'Forum', path: '/forum/:id', component: PageForum, props: true },
   {
     name: 'ThreadShow',
@@ -40,5 +55,14 @@ const routes = [
 
 export default createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior (to) {
+    const scroll = {}
+
+    // check of meta... of a route is set.
+    if (to.meta.toTop) scroll.top = 0
+    if (to.meta.smoothScroll) scroll.behavior = 'smooth'
+
+    return scroll
+  }
 })
