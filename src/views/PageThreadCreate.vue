@@ -18,15 +18,17 @@ export default {
     }
   },
   methods: {
-    save () {
-      this.$store.dispatch('createThread', {
+    async save () {
+      const thread = await this.$store.dispatch('createThread', {
         title: this.title,
         text: this.text,
         forumId: this.forum.id
       })
+
+      this.$router.push({ name: 'ThreadShow', params: { id: thread.id } })
     },
     cancel () {
-      console.log('cancel')
+      this.$router.push({ name: 'Forum', params: { id: this.forum.id } })
     }
   }
 }
