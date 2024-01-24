@@ -7,7 +7,7 @@ export default createStore({
     authId: 'ALXhxjwgY9PinwNGHpfai6OWyDu2'
   },
   getters: {
-    authUser: state => {
+    authUser: (state) => {
       const user = state.users.find(({ id }) => id === state.authId)
 
       if (!user) return null
@@ -15,14 +15,32 @@ export default createStore({
       return {
         ...user,
         // 'get' acts as a property. e.g. user.posts
-        get posts () { return state.posts.filter(({ userId }) => userId === user.id) },
-        get postsCount () { return this.posts.length },
-        get threads () { return state.threads.filter(({ userId }) => userId === user.id) },
-        get threadsCount () { return this.threads.length }
+        get posts () {
+          return state.posts.filter(({ userId }) => userId === user.id)
+        },
+        get postsCount () {
+          return this.posts.length
+        },
+        get threads () {
+          return state.threads.filter(({ userId }) => userId === user.id)
+        },
+        get threadsCount () {
+          return this.threads.length
+        }
       }
     }
   },
   actions: {
+    async updateThread ({ commit, state, dispatch }, { title, text, id }) {
+      const thread = state.threads.find((t) => t.id === id)
+      // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
+      const post = state.posts.find((p) => p.id === thread.posts[0])
+
+      commit('modifyThread', { ...thread, title })
+      commit('modifyPost', { ...post, text, threadId: thread.id })
+
+      return thread
+    },
     async createThread ({ commit, state, dispatch }, { title, text, forumId }) {
       const publishedAt = Math.floor(Date.now() / 1000) // in secs.
       const userId = state.authId
@@ -35,28 +53,37 @@ export default createStore({
 
       return state.threads.find(({ id }) => id === thread.id)
     },
-    updateUser ({ commit }, user) {
-      commit('setUser', { user, userId: user.id })
-    },
     createPost ({ commit, state }, post) {
       post.id = 'post-' + Math.random() // temp dev value (could also use a package to generate ids). In real world, value should be generated from DB.
       post.userId = state.authId
       post.publishedAt = Math.floor(Date.now() / 1000) // in secs.
 
       commit('setPost', { post })
-      commit('appendPostToThread', { postId: post.id, threadId: post.threadId })
+      commit('appendPostToThread', {
+        postId: post.id,
+        threadId: post.threadId
+      })
+    },
+    updateUser ({ commit }, user) {
+      commit('setUser', { user, userId: user.id })
     }
   },
   mutations: {
     setThread (state, thread) {
       state.threads.push(thread)
     },
-    setUser (state, { user, userId }) {
-      const userIndex = state.users.findIndex(({ id }) => id === userId)
-      state.users[userIndex] = user
+    modifyThread (state, thread) {
+      const index = state.threads.findIndex((t) => t.id === thread.id)
+      state.threads[index] = thread
     },
     setPost (state, { post }) {
       state.posts.push(post)
+    },
+    modifyPost (state, post) {
+      const index = state.posts.findIndex(
+        (p) => p.threadId === post.threadId
+      )
+      state.posts[index] = post
     },
     appendPostToThread (state, { postId, threadId }) {
       const thread = state.threads.find(({ id }) => id === threadId)
@@ -72,6 +99,10 @@ export default createStore({
       const user = state.users.find(({ id }) => id === userId)
       user.threads = user.threads || [] // prevent error when a user does not have posts property
       user.threads.push(threadId)
+    },
+    setUser (state, { user, userId }) {
+      const index = state.users.findIndex(({ id }) => id === userId)
+      state.users[index] = user
     }
   }
 })

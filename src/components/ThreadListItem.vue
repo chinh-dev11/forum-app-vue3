@@ -41,6 +41,9 @@ export default {
         <p class="text-xsmall text-faded">
           <app-date :timestamp="thread.publishedAt" />
         </p>
+        <router-link :to="{ name: 'ThreadEdit', params: { id: thread.id } }"
+          >Edit</router-link
+        >
       </div>
     </div>
   </div>

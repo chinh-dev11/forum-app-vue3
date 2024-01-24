@@ -7,6 +7,7 @@ import PageForum from '@/views/PageForum.vue'
 import PageCategory from '@/views/PageCategory.vue'
 import PageProfile from '@/views/PageProfile.vue'
 import PageThreadCreate from '@/views/PageThreadCreate.vue'
+import PageThreadEdit from '@/views/PageThreadEdit.vue'
 
 const routes = [
   { name: 'Home', path: '/', component: PageHome },
@@ -55,6 +56,12 @@ const routes = [
     name: 'ThreadCreate',
     path: '/forum/:forumId/thread/create',
     component: PageThreadCreate,
+    props: true
+  },
+  {
+    name: 'ThreadEdit',
+    path: '/thread/:id/edit',
+    component: PageThreadEdit,
     props: true
   },
   { name: 'NotFound', path: '/:pathMatch(.*)*', component: PageNotFound }
