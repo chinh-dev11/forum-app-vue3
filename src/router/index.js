@@ -6,6 +6,7 @@ import dataSource from '@/data.json'
 import PageForum from '@/views/PageForum.vue'
 import PageCategory from '@/views/PageCategory.vue'
 import PageProfile from '@/views/PageProfile.vue'
+import PageThreadCreate from '@/views/PageThreadCreate.vue'
 
 const routes = [
   { name: 'Home', path: '/', component: PageHome },
@@ -50,7 +51,13 @@ const routes = [
       }
     }
   },
-  { path: '/:pathMatch(.*)*', name: 'NotFound', component: PageNotFound }
+  {
+    name: 'ThreadCreate',
+    path: '/forum/:forumId/thread/create',
+    component: PageThreadCreate,
+    props: true
+  },
+  { name: 'NotFound', path: '/:pathMatch(.*)*', component: PageNotFound }
 ]
 
 export default createRouter({

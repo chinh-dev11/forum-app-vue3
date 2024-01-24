@@ -1,9 +1,20 @@
 <script>
 export default {
+  props: {
+    forumId: {
+      type: String,
+      required: true
+    }
+  },
   data () {
     return {
       title: '',
       text: ''
+    }
+  },
+  computed: {
+    forum () {
+      return this.$store.state.forums.find(({ id }) => id === this.forumId)
     }
   },
   methods: {
