@@ -8,7 +8,11 @@ export default {
   },
   methods: {
     save () {
-      console.log('save')
+      this.$store.dispatch('createThread', {
+        title: this.title,
+        text: this.text,
+        forumId: this.forum.id
+      })
     },
     cancel () {
       console.log('cancel')
