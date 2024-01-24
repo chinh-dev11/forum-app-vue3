@@ -31,7 +31,7 @@ export default {
       this.$router.push({ name: 'ThreadShow', params: { id: thread.id } })
     },
     cancel () {
-      this.$router.push({ name: 'Forum', params: { id: this.thread.forumId } })
+      this.$router.push({ name: 'ThreadShow', params: { id: this.thread.id } })
     }
   }
 }
