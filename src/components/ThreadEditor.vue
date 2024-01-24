@@ -1,33 +1,28 @@
-<script>
-export default {
-  props: {
-    title: {
-      type: String,
-      default: ''
-    },
-    text: {
-      type: String,
-      default: ''
-    }
+<script setup>
+import { defineProps, defineEmits, reactive, computed } from 'vue'
+
+const props = defineProps({
+  title: {
+    type: String,
+    default: ''
   },
-  data () {
-    return {
-      form: {
-        title: this.title,
-        text: this.text
-      }
-    }
-  },
-  computed: {
-    existing () {
-      return !!this.title
-    }
-  },
-  methods: {
-    save () {
-      this.$emit('save', { ...this.form })
-    }
+  text: {
+    type: String,
+    default: ''
   }
+})
+
+const emits = defineEmits(['save'])
+
+const form = reactive({
+  title: props.title,
+  text: props.text
+})
+
+const existing = computed(() => !!props.title)
+
+function save () {
+  emits('save', { ...form })
 }
 </script>
 
