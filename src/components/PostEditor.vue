@@ -24,10 +24,6 @@ export default {
 <template>
   <form @submit.prevent="save">
     <div class="form-group">
-      <label for="thread_title">Title:</label>
-      <input type="text" id="thread_title" class="form-input" name="title" />
-    </div>
-    <div class="form-group">
       <label for="thread_content">Content:</label>
       <!-- since 2-way binding uses input event, it causes an error on textarea element 'Assertion failed: Input argument is not an HTMLInputElement' -->
       <textarea
