@@ -41,8 +41,8 @@ export default {
     </p>
 
     <p class="text-xsmall text-faded text-center">
-      Member since <app-date :timestamp="user.registeredAt" />, last visited
-      <app-date :timestamp="user.lastVisitAt" />
+      Member since <AppDate :timestamp="user.registeredAt" />, last visited
+      <AppDate :timestamp="user.lastVisitAt" />
     </p>
 
     <div class="text-center">
@@ -56,4 +56,4 @@ export default {
   </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style scoped></style>

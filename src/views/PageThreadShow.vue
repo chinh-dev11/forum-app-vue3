@@ -38,12 +38,6 @@ export default {
   <div class="col-large push-top">
     <h1>
       {{ thread.title }}
-      <!-- <router-link
-      :to="{ name: 'ThreadEdit', params: { id: thread.id } }"
-      class="btn-green btn-small"
-      tag="button"
-      >Edit</router-link
-    > -->
       <!-- event and tag props are deprecated. Use scoped slots instead. -->
       <router-link
         :to="{ name: 'ThreadEdit', params: { id: thread.id } }"
@@ -55,15 +49,15 @@ export default {
     <p>
       By
       <a href="#" class="link-unstyled">{{ userById(thread.userId).name }}</a
-      >, <app-date :timestamp="thread.publishedAt" />
+      >, <AppDate :timestamp="thread.publishedAt" />
       <span
         style="float: right; margin-top: 2px"
         class="hide-mobile text-faded text-small"
         >3 replies by 3 contributors</span
       >
     </p>
-    <post-list :posts="threadPosts" />
-    <post-editor @save="addPost" />
+    <PostList :posts="threadPosts" />
+    <PostEditor @save="addPost" />
   </div>
 </template>
 

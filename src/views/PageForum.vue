@@ -41,7 +41,7 @@ export default {
       <div class="forum-list"></div>
     </div>
   </div>
-  <thread-list :threads="threads" />
+  <ThreadList :threads="threads" />
 </template>
 
-<style lang="scss" scoped></style>
+<style scoped></style>

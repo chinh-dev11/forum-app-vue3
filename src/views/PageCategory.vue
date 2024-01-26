@@ -28,11 +28,11 @@ export default {
   <div class="col-full push-top">
     <h1>{{ category.name }}</h1>
   </div>
-  <forum-list
+  <ForumList
     :forums="forumsForCategory"
     :title="category.name"
     :category-id="category.id"
   />
 </template>
 
-<style lang="scss" scoped></style>
+<style scoped></style>
