@@ -1,5 +1,5 @@
 # forum-app-vue3
-- Hosting at [Nobo Duy](https://forum.noboduy.me/).
+- Hosting at [Nobo Duy](https://forum.chinh.ca/).
 - Deploy on [Vercel](https://vercel.com).
 
 ## Project setup
