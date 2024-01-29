@@ -12,16 +12,13 @@ export default {
   },
   computed: {
     thread () {
-      return this.$store.state.threads.find((t) => t.id === this.id)
+      return this.$store.getters.thread(this.id)
     },
     threadPosts () {
-      return this.$store.state.posts.filter((p) => p.threadId === this.id)
+      return this.$store.state.posts.filter(({ threadId }) => threadId === this.id)
     }
   },
   methods: {
-    userById (userId) {
-      return this.$store.state.users.find((u) => u.id === userId)
-    },
     addPost (eventData) {
       const post = {
         ...eventData.post,
@@ -40,7 +37,7 @@ export default {
       {{ thread.title }}
       <!-- event and tag props are deprecated. Use scoped slots instead. -->
       <router-link
-        :to="{ name: 'ThreadEdit', params: { id: thread.id } }"
+        :to="{ name: 'ThreadEdit', params: { id } }"
         v-slot="{ navigate }"
         class="btn-green btn-small"
         ><button @click="navigate" role="link">Edit Thread</button></router-link
@@ -48,12 +45,17 @@ export default {
     </h1>
     <p>
       By
-      <a href="#" class="link-unstyled">{{ userById(thread.userId).name }}</a
+      <a href="#" class="link-unstyled">{{ thread.author.name }}</a
       >, <AppDate :timestamp="thread.publishedAt" />
       <span
         style="float: right; margin-top: 2px"
         class="hide-mobile text-faded text-small"
-        >3 replies by 3 contributors</span
+        >{{ thread.repliesCount }} repl{{
+          thread.repliesCount ? "ies" : "y"
+        }}
+        by {{ thread.contributorsCount }} contributor{{
+          thread.contributorsCount ? "s" : ""
+        }}</span
       >
     </p>
     <PostList :posts="threadPosts" />
