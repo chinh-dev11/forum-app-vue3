@@ -1,6 +1,6 @@
 import { createStore } from 'vuex'
 import dataSource from '@/data.json'
-import { findById, findIndexById, filterById, upSert } from '@/helpers'
+import { findById, findIndexById, upSert } from '@/helpers'
 
 export default createStore({
   state: {
