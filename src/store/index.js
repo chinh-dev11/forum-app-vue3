@@ -8,25 +8,30 @@ export default createStore({
     authId: 'ALXhxjwgY9PinwNGHpfai6OWyDu2'
   },
   getters: {
-    authUser: (state) => {
-      const user = findById(state.users, state.authId)
+    authUser: (state, getters) => {
+      return getters.user(state.authId)
+    },
+    user: (state) => {
+      return (id) => {
+        const user = findById(state.users, id)
 
-      if (!user) return null
+        if (!user) return null
 
-      return {
-        ...user,
-        // 'get' acts as a property. e.g. user.posts
-        get posts () {
-          return filterById(state.posts, user.id)
-        },
-        get postsCount () {
-          return this.posts.length
-        },
-        get threads () {
-          return filterById(state.threads, user.id)
-        },
-        get threadsCount () {
-          return this.threads.length
+        return {
+          ...user,
+          // 'get' acts as a property. e.g. user.posts
+          get posts () {
+            return state.posts.filter(({ userId }) => userId === user.id)
+          },
+          get postsCount () {
+            return this.posts.length
+          },
+          get threads () {
+            return state.threads.filter(({ userId }) => userId === user.id)
+          },
+          get threadsCount () {
+            return this.threads.length
+          }
         }
       }
     },

@@ -6,12 +6,9 @@ export default {
       required: true
     }
   },
-  methods: {
-    postById (postId) {
-      return this.$store.state.posts.find((p) => p.id === postId)
-    },
-    userById (userId) {
-      return this.$store.state.users.find((u) => u.id === userId)
+  computed: {
+    user () {
+      return this.$store.getters.user(this.thread.userId)
     }
   }
 }
@@ -26,17 +23,17 @@ export default {
         }}</router-link>
       </p>
       <p class="text-faded text-xsmall">
-        By <a href="profile.html">{{ userById(thread.userId).name }}</a
+        By <a href="profile.html">{{ user.name }}</a
         >,
-        <AppDate :timestamp="thread.publishedAt" />
+        <AppDate :timestamp="user.registeredAt" />
       </p>
     </div>
     <div class="activity">
-      <p class="replies-count">{{ thread.posts.length }} replies</p>
-      <img class="avatar-medium" :src="userById(thread.userId).avatar" alt="" />
+      <p class="replies-count">{{ thread.repliesCount }} replies</p>
+      <img class="avatar-medium" :src="user.avatar" alt="" />
       <div>
         <p class="text-xsmall">
-          <a href="profile.html">{{ userById(thread.userId).name }}</a>
+          <a href="profile.html">{{ user.name }}</a>
         </p>
         <p class="text-xsmall text-faded">
           <AppDate :timestamp="thread.publishedAt" />

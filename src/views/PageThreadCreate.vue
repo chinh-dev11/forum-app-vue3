@@ -1,5 +1,6 @@
 <script>
 import ThreadEditor from '@/components/ThreadEditor.vue'
+import { findById } from '@/helpers'
 
 export default {
   components: { ThreadEditor },
@@ -11,7 +12,7 @@ export default {
   },
   computed: {
     forum () {
-      return this.$store.state.forums.find(({ id }) => id === this.forumId)
+      return findById(this.$store.state.forums, this.forumId)
     }
   },
   methods: {

@@ -15,14 +15,14 @@ export default {
       return this.$store.getters.thread(this.id)
     },
     threadPosts () {
-      return this.$store.state.posts.filter(({ threadId }) => threadId === this.id)
+      return this.$store.state.posts.filter(({ threadId }) => threadId === this.thread.id)
     }
   },
   methods: {
     addPost (eventData) {
       const post = {
         ...eventData.post,
-        threadId: this.id
+        threadId: this.thread.id
       }
 
       this.$store.dispatch('createPost', post)
@@ -37,7 +37,7 @@ export default {
       {{ thread.title }}
       <!-- event and tag props are deprecated. Use scoped slots instead. -->
       <router-link
-        :to="{ name: 'ThreadEdit', params: { id } }"
+        :to="{ name: 'ThreadEdit', params: { id: thread.id } }"
         v-slot="{ navigate }"
         class="btn-green btn-small"
         ><button @click="navigate" role="link">Edit Thread</button></router-link
