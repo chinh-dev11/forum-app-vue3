@@ -20,7 +20,7 @@ export default {
 </script>
 
 <template>
-  <forum-list
+  <ForumList
     v-for="category in categories"
     :key="category.id"
     :forums="getForumsForCategory(category)"

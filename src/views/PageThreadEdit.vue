@@ -40,7 +40,7 @@ export default {
 <template>
   <div class="col-full push-top">
     <h1>Editing {{ thread.title }}</h1>
-    <thread-editor
+    <ThreadEditor
       :title="thread.title"
       :text="text"
       @save="save"

@@ -14,7 +14,7 @@ export default {
 
 <template>
     <div class="post-list">
-      <post-list-item v-for="post in posts" :key="post.id" :post="post" />
+      <PostListItem v-for="post in posts" :key="post.id" :post="post" />
     </div>
 </template>
 

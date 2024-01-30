@@ -16,7 +16,7 @@ export default {
   <div class="col-full">
     <div class="thread-list">
       <h2 class="list-title">Threads</h2>
-      <thread-list-item
+      <ThreadListItem
         v-for="thread in threads"
         :key="thread.id"
         :thread="thread"

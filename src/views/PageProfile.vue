@@ -21,8 +21,8 @@ export default {
 <template>
   <div class="flex-grid">
     <div class="col-3 push-top">
-      <user-profile-card-editor v-if="edit" :user="user" />
-      <user-profile-card v-else :user="user" />
+      <UserProfileCardEditor v-if="edit" :user="user" />
+      <UserProfileCard v-else :user="user" />
     </div>
 
     <div class="col-7 push-top">
@@ -33,7 +33,7 @@ export default {
 
       <hr />
 
-      <post-list :posts="user.posts" />
+      <PostList :posts="user.posts" />
       <!-- <div class="activity-list">
         <div class="activity">
           <div class="activity-header">

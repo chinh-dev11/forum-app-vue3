@@ -12,20 +12,17 @@ export default {
   },
   computed: {
     thread () {
-      return this.$store.state.threads.find((t) => t.id === this.id)
+      return this.$store.getters.thread(this.id)
     },
     threadPosts () {
-      return this.$store.state.posts.filter((p) => p.threadId === this.id)
+      return this.$store.state.posts.filter(({ threadId }) => threadId === this.thread.id)
     }
   },
   methods: {
-    userById (userId) {
-      return this.$store.state.users.find((u) => u.id === userId)
-    },
     addPost (eventData) {
       const post = {
         ...eventData.post,
-        threadId: this.id
+        threadId: this.thread.id
       }
 
       this.$store.dispatch('createPost', post)
@@ -38,12 +35,6 @@ export default {
   <div class="col-large push-top">
     <h1>
       {{ thread.title }}
-      <!-- <router-link
-      :to="{ name: 'ThreadEdit', params: { id: thread.id } }"
-      class="btn-green btn-small"
-      tag="button"
-      >Edit</router-link
-    > -->
       <!-- event and tag props are deprecated. Use scoped slots instead. -->
       <router-link
         :to="{ name: 'ThreadEdit', params: { id: thread.id } }"
@@ -54,16 +45,21 @@ export default {
     </h1>
     <p>
       By
-      <a href="#" class="link-unstyled">{{ userById(thread.userId).name }}</a
-      >, <app-date :timestamp="thread.publishedAt" />
+      <a href="#" class="link-unstyled">{{ thread.author.name }}</a
+      >, <AppDate :timestamp="thread.publishedAt" />
       <span
         style="float: right; margin-top: 2px"
         class="hide-mobile text-faded text-small"
-        >3 replies by 3 contributors</span
+        >{{ thread.repliesCount }} repl{{
+          thread.repliesCount ? "ies" : "y"
+        }}
+        by {{ thread.contributorsCount }} contributor{{
+          thread.contributorsCount ? "s" : ""
+        }}</span
       >
     </p>
-    <post-list :posts="threadPosts" />
-    <post-editor @save="addPost" />
+    <PostList :posts="threadPosts" />
+    <PostEditor @save="addPost" />
   </div>
 </template>
 

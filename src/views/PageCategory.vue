@@ -1,5 +1,6 @@
 <script>
 import ForumList from '@/components/ForumList.vue'
+import { findById } from '@/helpers'
 
 export default {
   components: { ForumList },
@@ -11,14 +12,10 @@ export default {
   },
   computed: {
     category () {
-      return this.$store.state.categories.find(
-        (category) => category.id === this.id
-      )
+      return findById(this.$store.state.categories, this.id)
     },
-    forumsForCategory () {
-      return this.$store.state.forums.filter(
-        ({ categoryId }) => categoryId === this.id
-      )
+    categoryForums () {
+      return this.$store.state.forums.filter(({ categoryId }) => categoryId === this.category.id)
     }
   }
 }
@@ -28,11 +25,11 @@ export default {
   <div class="col-full push-top">
     <h1>{{ category.name }}</h1>
   </div>
-  <forum-list
-    :forums="forumsForCategory"
+  <ForumList
+    :forums="categoryForums"
     :title="category.name"
     :category-id="category.id"
   />
 </template>
 
-<style lang="scss" scoped></style>
+<style scoped></style>
