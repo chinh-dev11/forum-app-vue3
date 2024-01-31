@@ -1,9 +1,9 @@
 // Provided by Firebase > Project settings > General > Your apps
 module.exports = {
-  apiKey: 'AIzaSyCekjUu07YoZe2KWx86JGVtvMIREWuZ-uU',
-  authDomain: 'forum-app-vue3.firebaseapp.com',
-  projectId: 'forum-app-vue3',
-  storageBucket: 'forum-app-vue3.appspot.com',
-  messagingSenderId: '517811724284',
-  appId: '1:517811724284:web:02b8ecb5cc304f50615c79'
+  apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
+  authDomain: process.env.VUE_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VUE_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VUE_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VUE_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VUE_APP_FIREBASE_APP_ID
 }
