@@ -1,10 +1,13 @@
 import { createStore } from 'vuex'
-import dataSource from '@/data.json'
-import { findById, findIndexById, upSert } from '@/helpers'
+import { findById, upSert } from '@/helpers'
 
 export default createStore({
   state: {
-    ...dataSource,
+    categories: [],
+    forums: [],
+    threads: [],
+    posts: [],
+    users: [],
     authId: 'ALXhxjwgY9PinwNGHpfai6OWyDu2'
   },
   getters: {
@@ -15,7 +18,7 @@ export default createStore({
       return (id) => {
         const user = findById(state.users, id)
 
-        if (!user) return null
+        if (!user) return {}
 
         return {
           ...user,
@@ -38,6 +41,8 @@ export default createStore({
     thread: (state) => {
       return (id) => {
         const thread = findById(state.threads, id)
+
+        if (!thread) return {}
 
         return {
           ...thread,
@@ -94,14 +99,15 @@ export default createStore({
       })
     },
     updateUser ({ commit }, user) {
-      commit('setUser', { user, userId: user.id })
+      commit('setUser', { user })
     }
   },
   mutations: {
-    setThread (state, thread) {
+    setThread (state, { thread }) {
+      console.log('setThread', thread)
       upSert(state.threads, thread)
     },
-    setPost (state, post) {
+    setPost (state, { post }) {
       upSert(state.posts, post)
     },
     appendContributorToThread: makeAppendChildToParentMutation({
@@ -120,9 +126,8 @@ export default createStore({
       parent: 'users',
       child: 'threads'
     }),
-    setUser (state, { user, userId }) {
-      const index = findIndexById(state.users, userId)
-      state.users[index] = user
+    setUser (state, { user }) {
+      upSert(state.users, user)
     }
   }
 })

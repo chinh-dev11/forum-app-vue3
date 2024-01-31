@@ -6,6 +6,7 @@ NOTES.md
 *.orig.*
 *copy*
 serviceAccount.json
+firebase.js
 
 
 # local env files

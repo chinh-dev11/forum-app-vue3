@@ -9,7 +9,7 @@ export default {
   props: {
     timestamp: {
       type: Number, // secs in Unix format.
-      required: true
+      default: null
     }
   },
   methods: {
@@ -25,7 +25,7 @@ export default {
 </script>
 
 <template>
-  <span :title="humanReadableDate()">
+  <span v-if="timestamp" :title="humanReadableDate()">
     {{ dateFromNow() }}.
   </span>
 </template>
