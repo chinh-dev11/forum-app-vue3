@@ -61,36 +61,23 @@ export default createStore({
     }
   },
   actions: {
-    async fetchThread ({ commit, state }, { id }) {
-      const db = getFirestore()
-
-      return new Promise(resolve => {
-        onSnapshot(doc(db, 'threads', id), (docThread) => {
-          const thread = { ...docThread.data(), id: docThread.id }
-          commit('setThread', { thread })
-          resolve(thread)
-        })
-      })
+    fetchThread ({ dispatch }, { id }) {
+      return dispatch('fetchItem', { resource: 'threads', id })
     },
-    async fetchUser ({ commit, state }, { id }) {
-      const db = getFirestore()
-
-      return new Promise(resolve => {
-        onSnapshot(doc(db, 'users', id), (docUser) => {
-          const user = { ...docUser.data(), id: docUser.id }
-          commit('setUser', { user })
-          resolve(user)
-        })
-      })
+    fetchUser ({ dispatch }, { id }) {
+      return dispatch('fetchItem', { resource: 'users', id })
     },
-    async fetchPost ({ commit, state }, { id }) {
+    fetchPost ({ dispatch }, { id, emoji }) {
+      return dispatch('fetchItem', { resource: 'posts', id, emoji })
+    },
+    fetchItem ({ commit, state }, { resource, id, emoji }) {
       const db = getFirestore()
 
       return new Promise(resolve => {
-        onSnapshot(doc(db, 'posts', id), (docPost) => {
-          const post = { ...docPost.data(), id: docPost.id }
-          commit('setPost', { post })
-          resolve(post)
+        onSnapshot(doc(db, resource, id), (docRes) => {
+          const item = { ...docRes.data(), id: docRes.id, emoji }
+          commit('setItem', { resource, item })
+          resolve(item)
         })
       })
     },
@@ -99,8 +86,8 @@ export default createStore({
       // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
       const post = findById(state.posts, thread.posts[0])
 
-      commit('setThread', { ...thread, title })
-      commit('setPost', { ...post, text })
+      commit('setItem', { resource: 'threads', item: { ...thread, title } })
+      commit('setItem', { resource: 'posts', item: { ...post, text } })
 
       return thread
     },
@@ -110,7 +97,7 @@ export default createStore({
       const id = 'thread-' + Math.random()
       const thread = { forumId, title, publishedAt, userId, id }
 
-      commit('setThread', thread)
+      commit('setItem', { resource: 'threads', item: thread })
       commit('appendThreadToForum', { parentId: forumId, childId: thread.id })
       commit('appendThreadToUser', { parentId: userId, childId: thread.id })
       dispatch('createPost', { text, threadId: thread.id })
@@ -122,7 +109,7 @@ export default createStore({
       post.userId = state.authId
       post.publishedAt = Math.floor(Date.now() / 1000) // in secs.
 
-      commit('setPost', post)
+      commit('setItem', { resource: 'posts', item: post })
       commit('appendPostToThread', {
         childId: post.id,
         parentId: post.threadId
@@ -133,15 +120,12 @@ export default createStore({
       })
     },
     updateUser ({ commit }, user) {
-      commit('setUser', { user })
+      commit('setItem', { resource: 'users', item: user })
     }
   },
   mutations: {
-    setThread (state, { thread }) {
-      upSert(state.threads, thread)
-    },
-    setPost (state, { post }) {
-      upSert(state.posts, post)
+    setItem (state, { resource, item }) {
+      upSert(state[resource], item)
     },
     appendContributorToThread: makeAppendChildToParentMutation({
       parent: 'threads',
@@ -158,10 +142,7 @@ export default createStore({
     appendThreadToUser: makeAppendChildToParentMutation({
       parent: 'users',
       child: 'threads'
-    }),
-    setUser (state, { user }) {
-      upSert(state.users, user)
-    }
+    })
   }
 })
 

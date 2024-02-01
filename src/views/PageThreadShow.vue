@@ -35,10 +35,10 @@ export default {
     // fetch user
     this.$store.dispatch('fetchUser', { id: thread.userId })
 
-    // fetch posts
     thread.posts.forEach(async (postId) => {
-      const { userId } = await this.$store.dispatch('fetchPost', { id: postId })
-      // fetch post user
+      // fetch post
+      const { userId } = await this.$store.dispatch('fetchPost', { id: postId, emoji: '🙂' })
+      // fetch user of the ppst
       this.$store.dispatch('fetchUser', { id: userId })
     })
   }
