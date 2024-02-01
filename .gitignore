@@ -3,7 +3,9 @@ node_modules
 /dist
 NOTES.md
 *.bk.*
-
+*.orig.*
+*copy*
+serviceAccount.json
 
 # local env files
 .env.local

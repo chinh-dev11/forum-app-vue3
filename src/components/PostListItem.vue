@@ -8,7 +8,7 @@ export default {
   },
   computed: {
     user () {
-      return this.$store.getters.user(this.post.userId)
+      return this.$store.getters.user(this.post.userId) || {}
     }
   }
 }

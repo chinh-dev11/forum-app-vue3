@@ -24,7 +24,7 @@ export default {
     <!-- use .navbar-open to open nav -->
     <nav class="navbar">
       <ul>
-        <li class="navbar-user">
+        <li v-if="authUser" class="navbar-user">
           <router-link
             :to="{ name: 'Profile', params: { id: authUser.id } }"
             href="#"
