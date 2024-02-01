@@ -64,11 +64,20 @@ export default createStore({
     fetchThread ({ dispatch }, { id }) {
       return dispatch('fetchItem', { resource: 'threads', id })
     },
+    fetchThreads ({ dispatch }, { ids }) {
+      return dispatch('fetchItems', { resource: 'threads', ids })
+    },
     fetchUser ({ dispatch }, { id }) {
       return dispatch('fetchItem', { resource: 'users', id })
     },
+    fetchUsers ({ dispatch }, { ids }) {
+      return dispatch('fetchItems', { resource: 'users', ids })
+    },
     fetchPost ({ dispatch }, { id, emoji }) {
       return dispatch('fetchItem', { resource: 'posts', id, emoji })
+    },
+    fetchPosts ({ dispatch }, { ids }) {
+      return dispatch('fetchItems', { resource: 'posts', ids, emoji: '🙂' })
     },
     fetchItem ({ commit, state }, { resource, id, emoji }) {
       const db = getFirestore()
@@ -80,6 +89,9 @@ export default createStore({
           resolve(item)
         })
       })
+    },
+    fetchItems ({ dispatch }, { resource, ids, emoji }) {
+      return Promise.all(ids.map((id) => dispatch('fetchItem', { resource, id, emoji })))
     },
     async updateThread ({ commit, state }, { title, text, id }) {
       const thread = findById(state.threads, id)
