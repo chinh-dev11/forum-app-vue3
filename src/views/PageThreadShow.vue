@@ -30,7 +30,6 @@ export default {
     }
   },
   beforeCreate () {
-    console.log('beforeCreate', this.id)
     const db = getFirestore()
 
     // fetch the thread
