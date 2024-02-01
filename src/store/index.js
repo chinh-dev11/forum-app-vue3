@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import { findById, upSert } from '@/helpers'
+import { getFirestore, doc, onSnapshot } from 'firebase/firestore'
 
 export default createStore({
   state: {
@@ -60,6 +61,39 @@ export default createStore({
     }
   },
   actions: {
+    async fetchThread ({ commit, state }, { id }) {
+      const db = getFirestore()
+
+      return new Promise(resolve => {
+        onSnapshot(doc(db, 'threads', id), (docThread) => {
+          const thread = { ...docThread.data(), id: docThread.id }
+          commit('setThread', { thread })
+          resolve(thread)
+        })
+      })
+    },
+    async fetchUser ({ commit, state }, { id }) {
+      const db = getFirestore()
+
+      return new Promise(resolve => {
+        onSnapshot(doc(db, 'users', id), (docUser) => {
+          const user = { ...docUser.data(), id: docUser.id }
+          commit('setUser', { user })
+          resolve(user)
+        })
+      })
+    },
+    async fetchPost ({ commit, state }, { id }) {
+      const db = getFirestore()
+
+      return new Promise(resolve => {
+        onSnapshot(doc(db, 'posts', id), (docPost) => {
+          const post = { ...docPost.data(), id: docPost.id }
+          commit('setPost', { post })
+          resolve(post)
+        })
+      })
+    },
     async updateThread ({ commit, state }, { title, text, id }) {
       const thread = findById(state.threads, id)
       // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
@@ -104,7 +138,6 @@ export default createStore({
   },
   mutations: {
     setThread (state, { thread }) {
-      console.log('setThread', thread)
       upSert(state.threads, thread)
     },
     setPost (state, { post }) {
