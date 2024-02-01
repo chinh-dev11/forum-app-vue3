@@ -31,7 +31,7 @@
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",
-    "db:seed": "firebase firestore:delete --all-collection --yes && node firestoreImport",
+    "db:seed": "firebase firestore:delete --all-collections -f && node firestoreImport",
     "lint": "vue-cli-service lint",
     "serve": "vue-cli-service serve"
   },
