@@ -1,11 +1,6 @@
 <script>
 import PostList from '@/components/PostList.vue'
 import PostEditor from '@/components/PostEditor.vue'
-// import firebase from 'firebase'
-// import firebase from 'firebase/compat/app'
-// import 'firebase/compat/auth'
-// import { collection } from 'firebase/compat/firestore'
-
 import { getFirestore, doc, onSnapshot } from 'firebase/firestore'
 
 export default {
@@ -18,11 +13,9 @@ export default {
   },
   computed: {
     thread () {
-      // console.log(' this.$store.getters.thread(this.id)', this.$store.getters.thread(this.id))
       return this.$store.getters.thread(this.id)
     },
     threadPosts () {
-      console.log('this.$store.state.posts.filter(({ threadId }) => threadId === this.thread.id)', this.$store.state.posts.filter(({ threadId }) => threadId === this.thread.id))
       return this.$store.state.posts.filter(({ threadId }) => threadId === this.thread.id)
     }
   },
@@ -67,22 +60,6 @@ export default {
         })
       })
     })
-  },
-  created () {
-    console.log('created', this.id)
-    // const db = getFirestore()
-
-    // // fetch the thread
-    // onSnapshot(doc(db, 'threads', this.id), (doc) => {
-    //   const thread = { ...doc.data(), id: doc.id }
-    //   this.$store.commit('setThread', thread)
-    // })
-
-    // collection('threads').doc(this.id).onSnapshot((doc) => {
-    // console.log(doc.data())
-    // const thread = { ...doc.data(), id: doc.id }
-    // this.$store.commit('setThread', { thread })
-    // })
   }
 }
 </script>

@@ -9,7 +9,6 @@ const findIndexById = (resources, id) => resources.findIndex(r => r.id === id)
 const filterById = (resources, id) => resources.filter(r => r.id === id)
 
 const upSert = (resources, data) => {
-  console.log('upSert', data)
   const index = resources.findIndex(({ id }) => id === data.id)
 
   if (index === -1) resources.push(data) // insert (data id not found in resources)
