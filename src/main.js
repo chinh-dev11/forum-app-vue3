@@ -22,3 +22,8 @@ requireComponent.keys().forEach(function (fileName) {
 })
 
 forumApp.mount('#app')
+
+let foo
+const bar = 'merge into foo'
+if (bar) foo = bar
+foo.trim(' ')
