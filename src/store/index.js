@@ -1,6 +1,16 @@
 import { createStore } from 'vuex'
 import { findById, upSert } from '@/helpers'
-import { getFirestore, doc, onSnapshot } from 'firebase/firestore'
+
+// --- Firebase ---
+import { initializeApp } from 'firebase/app'
+import { getFirestore, collection, getDocs, doc, onSnapshot } from 'firebase/firestore'
+import firebaseConfig from '@/config/firebase'
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig)
+
+// Initialize Cloud Firestore and get a reference to the service
+const db = getFirestore(app)
 
 export default createStore({
   state: {
@@ -61,6 +71,18 @@ export default createStore({
     }
   },
   actions: {
+    async fetchAllCategories ({ commit }) {
+      const querySnapshot = await getDocs(collection(db, 'categories'))
+      const categories = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
+      commit('setItems', { resource: 'categories', items: categories })
+      return categories
+    },
+    fetchForum ({ dispatch }, { id }) {
+      return dispatch('fetchItem', { resource: 'forums', id })
+    },
+    fetchForums ({ dispatch }, { ids }) {
+      return dispatch('fetchItems', { resource: 'forums', ids })
+    },
     fetchThread ({ dispatch }, { id }) {
       return dispatch('fetchItem', { resource: 'threads', id })
     },
@@ -80,8 +102,6 @@ export default createStore({
       return dispatch('fetchItems', { resource: 'posts', ids, emoji: '🙂' })
     },
     fetchItem ({ commit, state }, { resource, id, emoji }) {
-      const db = getFirestore()
-
       return new Promise(resolve => {
         onSnapshot(doc(db, resource, id), (docRes) => {
           const item = { ...docRes.data(), id: docRes.id, emoji }
@@ -138,6 +158,11 @@ export default createStore({
   mutations: {
     setItem (state, { resource, item }) {
       upSert(state[resource], item)
+    },
+    setItems (state, { resource, items }) {
+      items.forEach(item => {
+        upSert(state[resource], item)
+      })
     },
     appendContributorToThread: makeAppendChildToParentMutation({
       parent: 'threads',

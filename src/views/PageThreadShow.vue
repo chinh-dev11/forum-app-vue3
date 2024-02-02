@@ -28,7 +28,8 @@ export default {
       this.$store.dispatch('createPost', { post })
     }
   },
-  async beforeCreate () {
+  // using created to ensure the reactivity of the computed props, instead of beforeCreate hook.
+  async created () {
     // fetch thread
     const thread = await this.$store.dispatch('fetchThread', { id: this.id })
 
