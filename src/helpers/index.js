@@ -15,7 +15,13 @@ const upSert = (resources, data) => {
   else resources[index] = { ...resources[index], ...data } // update
 }
 
+// flatten array and filter out any duplicates, null, empty, undefined values.
+const flatFilterValues = (values) => {
+  return [...new Set(values.flat().filter(value => value))]
+}
+
 export {
+  flatFilterValues,
   upSert,
   filterById,
   findIndexById,

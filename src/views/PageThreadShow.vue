@@ -1,7 +1,6 @@
 <script>
 import PostList from '@/components/PostList.vue'
 import PostEditor from '@/components/PostEditor.vue'
-import { getFirestore, doc, onSnapshot } from 'firebase/firestore'
 
 export default {
   components: { PostList, PostEditor },
@@ -29,36 +28,18 @@ export default {
       this.$store.dispatch('createPost', { post })
     }
   },
-  beforeCreate () {
-    const db = getFirestore()
+  // using created to ensure the reactivity of the computed props, instead of beforeCreate hook.
+  async created () {
+    // fetch thread
+    const thread = await this.$store.dispatch('fetchThread', { id: this.id })
 
-    // fetch the thread
-    onSnapshot(doc(db, 'threads', this.id), (docThread) => {
-      const thread = { ...docThread.data(), id: docThread.id }
-      this.$store.commit('setThread', { thread })
+    // fetch user
+    this.$store.dispatch('fetchUser', { id: thread.userId })
 
-      // fetch the thread user
-      onSnapshot(doc(db, 'users', thread.userId), (docUser) => {
-        const user = { ...docUser.data(), id: docUser.id }
-        this.$store.commit('setUser', { user })
-      })
-
-      // fetch the thread posts
-      thread.posts.forEach((postId) => {
-        onSnapshot(doc(db, 'posts', postId), (docPost) => {
-          const post = { ...docPost.data(), id: docPost.id }
-          this.$store.commit('setPost', { post })
-        })
-      })
-
-      // fetch the thread contributors (users)
-      thread.contributors.forEach((userId) => {
-        onSnapshot(doc(db, 'users', userId), (docUser) => {
-          const user = { ...docUser.data(), id: docUser.id }
-          this.$store.commit('setUser', { user })
-        })
-      })
-    })
+    // fetch posts
+    const posts = await this.$store.dispatch('fetchPosts', { ids: thread.posts })
+    // fetch the posts associated users
+    this.$store.dispatch('fetchUsers', { ids: posts.map(({ userId }) => userId) })
   }
 }
 </script>

@@ -1,6 +1,17 @@
 import { createStore } from 'vuex'
 import { findById, upSert } from '@/helpers'
 
+// --- Firebase ---
+import { initializeApp } from 'firebase/app'
+import { getFirestore, collection, getDocs, doc, onSnapshot } from 'firebase/firestore'
+import firebaseConfig from '@/config/firebase'
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig)
+
+// Initialize Cloud Firestore and get a reference to the service
+const db = getFirestore(app)
+
 export default createStore({
   state: {
     categories: [],
@@ -60,13 +71,55 @@ export default createStore({
     }
   },
   actions: {
+    async fetchAllCategories ({ commit }) {
+      const querySnapshot = await getDocs(collection(db, 'categories'))
+      const categories = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
+      commit('setItems', { resource: 'categories', items: categories })
+      return categories
+    },
+    fetchForum ({ dispatch }, { id }) {
+      return dispatch('fetchItem', { resource: 'forums', id })
+    },
+    fetchForums ({ dispatch }, { ids }) {
+      return dispatch('fetchItems', { resource: 'forums', ids })
+    },
+    fetchThread ({ dispatch }, { id }) {
+      return dispatch('fetchItem', { resource: 'threads', id })
+    },
+    fetchThreads ({ dispatch }, { ids }) {
+      return dispatch('fetchItems', { resource: 'threads', ids })
+    },
+    fetchUser ({ dispatch }, { id }) {
+      return dispatch('fetchItem', { resource: 'users', id })
+    },
+    fetchUsers ({ dispatch }, { ids }) {
+      return dispatch('fetchItems', { resource: 'users', ids })
+    },
+    fetchPost ({ dispatch }, { id, emoji }) {
+      return dispatch('fetchItem', { resource: 'posts', id, emoji })
+    },
+    fetchPosts ({ dispatch }, { ids }) {
+      return dispatch('fetchItems', { resource: 'posts', ids, emoji: '🙂' })
+    },
+    fetchItem ({ commit, state }, { resource, id, emoji }) {
+      return new Promise(resolve => {
+        onSnapshot(doc(db, resource, id), (docRes) => {
+          const item = { ...docRes.data(), id: docRes.id, emoji }
+          commit('setItem', { resource, item })
+          resolve(item)
+        })
+      })
+    },
+    fetchItems ({ dispatch }, { resource, ids, emoji }) {
+      return Promise.all(ids.map((id) => dispatch('fetchItem', { resource, id, emoji })))
+    },
     async updateThread ({ commit, state }, { title, text, id }) {
       const thread = findById(state.threads, id)
       // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
       const post = findById(state.posts, thread.posts[0])
 
-      commit('setThread', { ...thread, title })
-      commit('setPost', { ...post, text })
+      commit('setItem', { resource: 'threads', item: { ...thread, title } })
+      commit('setItem', { resource: 'posts', item: { ...post, text } })
 
       return thread
     },
@@ -76,7 +129,7 @@ export default createStore({
       const id = 'thread-' + Math.random()
       const thread = { forumId, title, publishedAt, userId, id }
 
-      commit('setThread', thread)
+      commit('setItem', { resource: 'threads', item: thread })
       commit('appendThreadToForum', { parentId: forumId, childId: thread.id })
       commit('appendThreadToUser', { parentId: userId, childId: thread.id })
       dispatch('createPost', { text, threadId: thread.id })
@@ -88,7 +141,7 @@ export default createStore({
       post.userId = state.authId
       post.publishedAt = Math.floor(Date.now() / 1000) // in secs.
 
-      commit('setPost', post)
+      commit('setItem', { resource: 'posts', item: post })
       commit('appendPostToThread', {
         childId: post.id,
         parentId: post.threadId
@@ -99,16 +152,17 @@ export default createStore({
       })
     },
     updateUser ({ commit }, user) {
-      commit('setUser', { user })
+      commit('setItem', { resource: 'users', item: user })
     }
   },
   mutations: {
-    setThread (state, { thread }) {
-      console.log('setThread', thread)
-      upSert(state.threads, thread)
+    setItem (state, { resource, item }) {
+      upSert(state[resource], item)
     },
-    setPost (state, { post }) {
-      upSert(state.posts, post)
+    setItems (state, { resource, items }) {
+      items.forEach(item => {
+        upSert(state[resource], item)
+      })
     },
     appendContributorToThread: makeAppendChildToParentMutation({
       parent: 'threads',
@@ -125,10 +179,7 @@ export default createStore({
     appendThreadToUser: makeAppendChildToParentMutation({
       parent: 'users',
       child: 'threads'
-    }),
-    setUser (state, { user }) {
-      upSert(state.users, user)
-    }
+    })
   }
 })
 
