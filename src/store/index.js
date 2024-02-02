@@ -3,7 +3,7 @@ import { findById, upSert } from '@/helpers'
 
 // --- Firebase ---
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, getDocs, doc, onSnapshot } from 'firebase/firestore'
+import { getFirestore, collection, getDocs, getDoc, doc } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
 
 // Initialize Firebase
@@ -71,11 +71,11 @@ export default createStore({
     }
   },
   actions: {
-    async fetchAllCategories ({ commit }) {
-      const querySnapshot = await getDocs(collection(db, 'categories'))
-      const categories = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
-      commit('setItems', { resource: 'categories', items: categories })
-      return categories
+    fetchCategory ({ dispatch }, { id }) {
+      return dispatch('fetchItem', { resource: 'categories', id })
+    },
+    fetchAllCategories ({ dispatch }) {
+      return dispatch('fetchAll', { resource: 'categories' })
     },
     fetchForum ({ dispatch }, { id }) {
       return dispatch('fetchItem', { resource: 'forums', id })
@@ -101,17 +101,25 @@ export default createStore({
     fetchPosts ({ dispatch }, { ids }) {
       return dispatch('fetchItems', { resource: 'posts', ids, emoji: '🙂' })
     },
-    fetchItem ({ commit, state }, { resource, id, emoji }) {
-      return new Promise(resolve => {
-        onSnapshot(doc(db, resource, id), (docRes) => {
-          const item = { ...docRes.data(), id: docRes.id, emoji }
-          commit('setItem', { resource, item })
-          resolve(item)
-        })
-      })
+    async fetchItem ({ commit, state }, { resource, id, emoji }) {
+      const docRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
+      const docSnap = await getDoc(docRef)
+      const item = { ...docSnap.data(), id: docSnap.id }
+
+      commit('setItem', { resource, item })
+
+      return item
     },
     fetchItems ({ dispatch }, { resource, ids, emoji }) {
       return Promise.all(ids.map((id) => dispatch('fetchItem', { resource, id, emoji })))
+    },
+    async fetchAll ({ commit }, { resource }) {
+      const querySnapshot = await getDocs(collection(db, resource))
+      const all = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
+
+      commit('setItems', { resource, items: all })
+
+      return all
     },
     async updateThread ({ commit, state }, { title, text, id }) {
       const thread = findById(state.threads, id)
@@ -187,6 +195,7 @@ function makeAppendChildToParentMutation ({ parent, child }) {
   return (state, { childId, parentId }) => {
     const resource = findById(state[parent], parentId)
     resource[child] = resource[child] || []
+
     // adding id to the resource only if the id is not already in the array.
     if (!resource[child].includes(childId)) resource[child].push(childId)
   }
