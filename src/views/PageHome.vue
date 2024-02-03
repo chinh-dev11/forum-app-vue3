@@ -8,15 +8,15 @@ export default {
       return this.$store.state.categories
     }
   },
-  async beforeCreate () {
+  async created () {
     // fetch all categories
-    this.$store.dispatch('fetchAllCategories')
+    await this.$store.dispatch('fetchAllCategories')
   }
 }
 </script>
 
 <template>
-  <CategoryList :categories="categories" />
+  <CategoryList v-if="categories.length" :categories="categories" />
 </template>
 
 <style scoped></style>

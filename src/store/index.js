@@ -117,6 +117,8 @@ export default createStore({
       return item
     },
     fetchItems ({ dispatch }, { resource, ids, emoji }) {
+      if (!ids) return []
+
       return Promise.all(ids.map((id) => dispatch('fetchItem', { resource, id, emoji })))
     },
     async fetchAll ({ commit }, { resource }) {
