@@ -101,9 +101,15 @@ export default createStore({
     fetchPosts ({ dispatch }, { ids }) {
       return dispatch('fetchItems', { resource: 'posts', ids, emoji: '🙂' })
     },
-    async fetchItem ({ commit, state }, { resource, id, emoji }) {
+    async fetchItem ({ commit }, { resource, id, emoji }) {
+      if (!id) return {}
+
+      // using upgrade Firestore modular API
       const docRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
       const docSnap = await getDoc(docRef)
+
+      if (!docSnap.exists()) return {}
+
       const item = { ...docSnap.data(), id: docSnap.id }
 
       commit('setItem', { resource, item })
@@ -114,8 +120,13 @@ export default createStore({
       return Promise.all(ids.map((id) => dispatch('fetchItem', { resource, id, emoji })))
     },
     async fetchAll ({ commit }, { resource }) {
-      const querySnapshot = await getDocs(collection(db, resource))
-      const all = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
+      // using upgrade Firestore modular API
+      const docRef = collection(db, resource)
+      const docSnap = await getDocs(docRef)
+
+      if (docSnap.empty) return []
+
+      const all = docSnap.docs.map(doc => ({ ...doc.data(), id: doc.id }))
 
       commit('setItems', { resource, items: all })
 

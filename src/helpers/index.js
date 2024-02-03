@@ -1,12 +1,14 @@
 const findById = (resources, id) => {
-  if (!resources) return null
-
   return resources.find(r => r.id === id)
 }
 
-const findIndexById = (resources, id) => resources.findIndex(r => r.id === id)
+const findIndexById = (resources, id) => {
+  return resources.findIndex(r => r.id === id)
+}
 
-const filterById = (resources, id) => resources.filter(r => r.id === id)
+const filterById = (resources, id) => {
+  return resources.filter(r => r.id === id)
+}
 
 const upSert = (resources, data) => {
   const index = resources.findIndex(({ id }) => id === data.id)
