@@ -73,7 +73,7 @@ export default {
           >
         </li>
         <li class="navbar-item">
-          <router-link :to="{ name: 'ThreadShow', params: { id: 'nonexistent' } }"
+          <router-link :to="{ name: 'Thread', params: { id: 'nonexistent' } }"
             >Thread</router-link
           >
         </li>

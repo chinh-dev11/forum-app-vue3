@@ -1,5 +1,6 @@
 <script>
 import CategoryList from '@/components/CategoryList.vue'
+import { mapActions } from 'vuex'
 
 export default {
   components: { CategoryList },
@@ -8,9 +9,12 @@ export default {
       return this.$store.state.categories
     }
   },
-  async created () {
+  methods: {
+    ...mapActions(['fetchAllCategories'])
+  },
+  created () {
     // fetch all categories
-    await this.$store.dispatch('fetchAllCategories')
+    this.fetchAllCategories()
   }
 }
 </script>

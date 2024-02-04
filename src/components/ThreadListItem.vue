@@ -1,4 +1,6 @@
 <script>
+import { mapActions } from 'vuex'
+
 export default {
   props: {
     thread: {
@@ -14,8 +16,11 @@ export default {
       return this.$store.getters.thread(this.thread.id)
     }
   },
+  methods: {
+    ...mapActions(['fetchUser'])
+  },
   async created () {
-    this.$store.dispatch('fetchUser', { id: this.thread.userId })
+    this.fetchUser({ id: this.thread.userId })
     this.$store.getters.thread(this.thread.id)
   }
 }
@@ -25,7 +30,7 @@ export default {
   <div class="thread">
     <div>
       <p>
-        <router-link :to="{ name: 'ThreadShow', params: { id: userThread.id } }">{{
+        <router-link :to="{ name: 'Thread', params: { id: userThread.id } }">{{
           userThread.title
         }}</router-link>
       </p>

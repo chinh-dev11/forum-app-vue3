@@ -1,6 +1,7 @@
 <script>
 import ThreadList from '@/components/ThreadList.vue'
 import { findById } from '@/helpers'
+import { mapActions } from 'vuex'
 
 export default {
   components: { ThreadList },
@@ -20,11 +21,12 @@ export default {
       )
     }
   },
+  methods: {
+    ...mapActions(['fetchForum', 'fetchThreads'])
+  },
   async created () {
-    const forum = await this.$store.dispatch('fetchForum', { id: this.id })
-    this.$store.dispatch('fetchThreads', {
-      ids: forum.threads
-    })
+    const forum = await this.fetchForum({ id: this.id })
+    this.fetchThreads({ ids: forum.threads })
   }
 }
 </script>

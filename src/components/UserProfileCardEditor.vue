@@ -1,4 +1,6 @@
 <script>
+import { mapActions } from 'vuex'
+
 export default {
   props: {
     user: {
@@ -14,8 +16,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['updateUser']),
     save () {
-      this.$store.dispatch('updateUser', { ...this.activeUser }) // clone the activeUser object: to prevent changes referenced to it before it's actually set to the users.
+      this.updateUser({ ...this.activeUser }) // clone the activeUser object: to prevent changes referenced to it before it's actually set to the users.
       this.$router.push({ name: 'Profile' }) // redirect to the profile page after save.
     },
     cancel () {

@@ -1,6 +1,7 @@
 <script>
 import ForumList from '@/components/ForumList.vue'
 import { findById } from '@/helpers'
+import { mapActions } from 'vuex'
 
 export default {
   components: { ForumList },
@@ -18,9 +19,12 @@ export default {
       return this.$store.state.forums.filter(({ categoryId }) => categoryId === this.category.id)
     }
   },
+  methods: {
+    ...mapActions(['fetchCategory', 'fetchForums'])
+  },
   async created () {
-    const category = await this.$store.dispatch('fetchCategory', { id: this.id })
-    this.$store.dispatch('fetchForums', { ids: category.forums })
+    const category = await this.fetchCategory({ id: this.id })
+    this.fetchForums({ ids: category.forums })
   }
 }
 </script>
