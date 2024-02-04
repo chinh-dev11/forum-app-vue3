@@ -13,6 +13,7 @@ const db = getFirestore(app)
 
 export default {
   // ------ Fetch single resource
+  fetchAuthUser: ({ dispatch, state }) => dispatch('fetchUser', { id: state.authId }),
   fetchCategory: ({ dispatch }, { id }) => dispatch('fetchItem', { resource: 'categories', id }),
   fetchForum: ({ dispatch }, { id }) => dispatch('fetchItem', { resource: 'forums', id }),
   fetchThread: ({ dispatch }, { id }) => dispatch('fetchItem', { resource: 'threads', id }),
