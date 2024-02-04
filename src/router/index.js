@@ -34,8 +34,9 @@ const routes = [
     name: 'ThreadShow',
     path: '/thread/:id',
     component: PageThreadShow,
-    props: true,
-    beforeEnter (to, from, next) {
+    props: true
+    // TODO: find a better solution of route guarding
+    /* beforeEnter (to, from, next) {
       const threadExists = dataSource.threads.find(
         (t) => t.id === to.params.id
       )
@@ -50,7 +51,7 @@ const routes = [
           hash: to.hash
         })
       }
-    }
+    } */
   },
   {
     name: 'ThreadCreate',

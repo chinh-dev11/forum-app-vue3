@@ -10,13 +10,6 @@ export default {
       required: true
     }
   },
-  methods: {
-    getForumsForCategory (category) {
-      return this.$store.state.forums.filter(
-        ({ categoryId }) => categoryId === category.id
-      )
-    }
-  },
   async created () {
     const forumIds = flatFilterValues(this.categories.map(({ forums }) => forums))
 
@@ -39,6 +32,13 @@ export default {
     // fetch posts of threads
     this.$store.dispatch('fetchPosts', { ids: threadPostsIds })
     // fetching users of the posts are not needed since the users are already fetched with threads userId and contributors (posts)
+  },
+  methods: {
+    getForumsForCategory (category) {
+      return this.$store.state.forums.filter(
+        ({ categoryId }) => categoryId === category.id
+      )
+    }
   }
 }
 </script>
