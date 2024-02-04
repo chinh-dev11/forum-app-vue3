@@ -9,7 +9,14 @@ export default {
   computed: {
     user () {
       return this.$store.getters.user(this.thread.userId)
+    },
+    userThread () {
+      return this.$store.getters.thread(this.thread.id)
     }
+  },
+  async created () {
+    this.$store.dispatch('fetchUser', { id: this.thread.userId })
+    this.$store.getters.thread(this.thread.id)
   }
 }
 </script>
@@ -18,8 +25,8 @@ export default {
   <div class="thread">
     <div>
       <p>
-        <router-link :to="{ name: 'ThreadShow', params: { id: thread.id } }">{{
-          thread.title
+        <router-link :to="{ name: 'ThreadShow', params: { id: userThread.id } }">{{
+          userThread.title
         }}</router-link>
       </p>
       <p class="text-faded text-xsmall">
@@ -29,14 +36,14 @@ export default {
       </p>
     </div>
     <div class="activity">
-      <p class="replies-count">{{ thread.repliesCount }} replies</p>
+      <p class="replies-count">{{ userThread.repliesCount }} replies</p>
       <img class="avatar-medium" :src="user.avatar" alt="" />
       <div>
         <p class="text-xsmall">
           <a href="profile.html">{{ user.name }}</a>
         </p>
         <p class="text-xsmall text-faded">
-          <AppDate :timestamp="thread.publishedAt" />
+          <AppDate :timestamp="userThread.publishedAt" />
         </p>
       </div>
     </div>

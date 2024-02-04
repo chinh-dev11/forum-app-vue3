@@ -12,8 +12,11 @@ export default {
   },
   computed: {
     forum () {
-      return findById(this.$store.state.forums, this.forumId)
+      return findById(this.$store.state.forums, this.forumId) || {}
     }
+  },
+  created () {
+    this.$store.dispatch('fetchForum', { id: this.forumId })
   },
   methods: {
     async save ({ title, text }) {

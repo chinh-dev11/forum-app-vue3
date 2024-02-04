@@ -1,5 +1,6 @@
 <script>
 import ThreadEditor from '@/components/ThreadEditor.vue'
+import { findById } from '@/helpers'
 
 export default {
   components: { ThreadEditor },
@@ -11,14 +12,18 @@ export default {
   },
   computed: {
     thread () {
-      return this.$store.state.threads.find(({ id }) => id === this.id)
+      return findById(this.$store.state.threads, this.id)
     },
     text () {
       // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post's text.
-      return this.$store.state.posts.find(
-        ({ id }) => id === this.thread.posts[0]
-      ).text
+      const post = findById(this.$store.state.posts, this.thread.posts[0])
+
+      return post ? post.text : ''
     }
+  },
+  async created () {
+    const thread = await this.$store.dispatch('fetchThread', { id: this.id })
+    this.$store.dispatch('fetchPost', { id: thread.posts[0] })
   },
   methods: {
     async save ({ title, text }) {
@@ -38,7 +43,7 @@ export default {
 </script>
 
 <template>
-  <div class="col-full push-top">
+  <div v-if="thread && text" class="col-full push-top">
     <h1>Editing {{ thread.title }}</h1>
     <ThreadEditor
       :title="thread.title"

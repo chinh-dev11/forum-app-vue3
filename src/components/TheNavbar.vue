@@ -63,17 +63,17 @@ export default {
           <router-link :to="{ name: 'Home' }">Home</router-link>
         </li>
         <li class="navbar-item">
-          <router-link :to="{ name: 'Category', params: { id: 'aaa' } }"
+          <router-link :to="{ name: 'Category', params: { id: 'nonexistent' } }"
             >Category</router-link
           >
         </li>
         <li class="navbar-item">
-          <router-link :to="{ name: 'Forum', params: { id: 'aaa' } }"
+          <router-link :to="{ name: 'Forum', params: { id: 'nonexistent' } }"
             >Forum</router-link
           >
         </li>
         <li class="navbar-item">
-          <router-link :to="{ name: 'ThreadShow', params: { id: 'aaa' } }"
+          <router-link :to="{ name: 'ThreadShow', params: { id: 'nonexistent' } }"
             >Thread</router-link
           >
         </li>

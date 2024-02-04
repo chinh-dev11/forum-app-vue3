@@ -3,7 +3,7 @@ import { findById, upSert } from '@/helpers'
 
 // --- Firebase ---
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, getDocs, doc, onSnapshot } from 'firebase/firestore'
+import { getFirestore, collection, getDocs, getDoc, doc } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
 
 // Initialize Firebase
@@ -71,11 +71,11 @@ export default createStore({
     }
   },
   actions: {
-    async fetchAllCategories ({ commit }) {
-      const querySnapshot = await getDocs(collection(db, 'categories'))
-      const categories = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
-      commit('setItems', { resource: 'categories', items: categories })
-      return categories
+    fetchCategory ({ dispatch }, { id }) {
+      return dispatch('fetchItem', { resource: 'categories', id })
+    },
+    fetchAllCategories ({ dispatch }) {
+      return dispatch('fetchAll', { resource: 'categories' })
     },
     fetchForum ({ dispatch }, { id }) {
       return dispatch('fetchItem', { resource: 'forums', id })
@@ -101,17 +101,38 @@ export default createStore({
     fetchPosts ({ dispatch }, { ids }) {
       return dispatch('fetchItems', { resource: 'posts', ids, emoji: '🙂' })
     },
-    fetchItem ({ commit, state }, { resource, id, emoji }) {
-      return new Promise(resolve => {
-        onSnapshot(doc(db, resource, id), (docRes) => {
-          const item = { ...docRes.data(), id: docRes.id, emoji }
-          commit('setItem', { resource, item })
-          resolve(item)
-        })
-      })
+    async fetchItem ({ commit }, { resource, id, emoji }) {
+      if (!id) return {}
+
+      // using upgrade Firestore modular API
+      const docRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
+      const docSnap = await getDoc(docRef)
+
+      if (!docSnap.exists()) return {}
+
+      const item = { ...docSnap.data(), id: docSnap.id }
+
+      commit('setItem', { resource, item })
+
+      return item
     },
     fetchItems ({ dispatch }, { resource, ids, emoji }) {
+      if (!ids) return []
+
       return Promise.all(ids.map((id) => dispatch('fetchItem', { resource, id, emoji })))
+    },
+    async fetchAll ({ commit }, { resource }) {
+      // using upgrade Firestore modular API
+      const docRef = collection(db, resource)
+      const docSnap = await getDocs(docRef)
+
+      if (docSnap.empty) return []
+
+      const all = docSnap.docs.map(doc => ({ ...doc.data(), id: doc.id }))
+
+      commit('setItems', { resource, items: all })
+
+      return all
     },
     async updateThread ({ commit, state }, { title, text, id }) {
       const thread = findById(state.threads, id)
@@ -186,7 +207,14 @@ export default createStore({
 function makeAppendChildToParentMutation ({ parent, child }) {
   return (state, { childId, parentId }) => {
     const resource = findById(state[parent], parentId)
+
+    if (!resource) {
+      console.warn(`Append child:${child}:${childId} to parent:${parent}:${parentId} failed because the parent:${parent} didin't exist`)
+      return
+    }
+
     resource[child] = resource[child] || []
+
     // adding id to the resource only if the id is not already in the array.
     if (!resource[child].includes(childId)) resource[child].push(childId)
   }

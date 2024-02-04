@@ -12,11 +12,19 @@ export default {
   },
   computed: {
     forum () {
-      return findById(this.$store.state.forums, this.id)
+      return findById(this.$store.state.forums, this.id) || {}
     },
     forumThreads () {
-      return this.forum.threads.map(threadId => this.$store.getters.thread(threadId))
+      return this.forum.threads?.map((threadId) =>
+        this.$store.getters.thread(threadId)
+      )
     }
+  },
+  async created () {
+    const forum = await this.$store.dispatch('fetchForum', { id: this.id })
+    this.$store.dispatch('fetchThreads', {
+      ids: forum.threads
+    })
   }
 }
 </script>
@@ -29,10 +37,11 @@ export default {
         <p class="text-lead">{{ forum.description }}</p>
       </div>
       <router-link
+        v-if="forum.id"
         :to="{ name: 'ThreadCreate', params: { forumId: forum.id } }"
         class="btn-green btn-small"
-        >Start a thread</router-link
-      >
+        >Start a thread
+      </router-link>
     </div>
   </div>
   <div class="col-full">
