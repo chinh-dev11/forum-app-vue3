@@ -110,7 +110,6 @@ export default {
   },
   createPost: async ({ commit, state }, { post }) => {
     post.userId = state.authId
-    console.log(post)
     post.publishedAt = Math.floor(Date.now() / 1000) // in secs.
 
     try {
