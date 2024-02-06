@@ -2,7 +2,15 @@ import { findById } from '@/helpers'
 
 // --- Firebase ---
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, getDocs, getDoc, doc } from 'firebase/firestore'
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  getDoc,
+  doc,
+  arrayUnion,
+  writeBatch
+} from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
 
 // Initialize Firebase
@@ -13,18 +21,24 @@ const db = getFirestore(app)
 
 export default {
   // ------ Fetch single resource
-  fetchAuthUser: ({ dispatch, state }) => dispatch('fetchUser', { id: state.authId }),
-  fetchCategory: ({ dispatch }, { id }) => dispatch('fetchItem', { resource: 'categories', id }),
-  fetchForum: ({ dispatch }, { id }) => dispatch('fetchItem', { resource: 'forums', id }),
-  fetchThread: ({ dispatch }, { id }) => dispatch('fetchItem', { resource: 'threads', id }),
-  fetchUser: ({ dispatch }, { id }) => dispatch('fetchItem', { resource: 'users', id }),
-  fetchPost: ({ dispatch }, { id, emoji }) => dispatch('fetchItem', { resource: 'posts', id, emoji }),
+  fetchAuthUser: ({ dispatch, state }) =>
+    dispatch('fetchUser', { id: state.authId }),
+  fetchCategory: ({ dispatch }, { id }) =>
+    dispatch('fetchItem', { resource: 'categories', id }),
+  fetchForum: ({ dispatch }, { id }) =>
+    dispatch('fetchItem', { resource: 'forums', id }),
+  fetchThread: ({ dispatch }, { id }) =>
+    dispatch('fetchItem', { resource: 'threads', id }),
+  fetchUser: ({ dispatch }, { id }) =>
+    dispatch('fetchItem', { resource: 'users', id }),
+  fetchPost: ({ dispatch }, { id, emoji }) =>
+    dispatch('fetchItem', { resource: 'posts', id, emoji }),
   fetchItem: async ({ commit }, { resource, id, emoji }) => {
     if (!id) return {}
 
     // using upgrade Firestore modular API
-    const docRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
-    const docSnap = await getDoc(docRef)
+    const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
+    const docSnap = await getDoc(resourceRef)
 
     if (!docSnap.exists()) return {}
 
@@ -36,24 +50,31 @@ export default {
   },
 
   // ------ Fetch multiple resources
-  fetchAllCategories: ({ dispatch }) => dispatch('fetchAll', { resource: 'categories' }),
-  fetchForums: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'forums', ids }),
-  fetchThreads: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'threads', ids }),
-  fetchUsers: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'users', ids }),
-  fetchPosts: ({ dispatch }, { ids }) => dispatch('fetchItems', { resource: 'posts', ids, emoji: '🙂' }),
+  fetchAllCategories: ({ dispatch }) =>
+    dispatch('fetchAll', { resource: 'categories' }),
+  fetchForums: ({ dispatch }, { ids }) =>
+    dispatch('fetchItems', { resource: 'forums', ids }),
+  fetchThreads: ({ dispatch }, { ids }) =>
+    dispatch('fetchItems', { resource: 'threads', ids }),
+  fetchUsers: ({ dispatch }, { ids }) =>
+    dispatch('fetchItems', { resource: 'users', ids }),
+  fetchPosts: ({ dispatch }, { ids }) =>
+    dispatch('fetchItems', { resource: 'posts', ids, emoji: '🙂' }),
   fetchItems: ({ dispatch }, { resource, ids, emoji }) => {
     if (!ids) return []
 
-    return Promise.all(ids.map((id) => dispatch('fetchItem', { resource, id, emoji })))
+    return Promise.all(
+      ids.map((id) => dispatch('fetchItem', { resource, id, emoji }))
+    )
   },
   fetchAll: async ({ commit }, { resource }) => {
     // using upgrade Firestore modular API
-    const docRef = collection(db, resource)
-    const docSnap = await getDocs(docRef)
+    const resourceRef = collection(db, resource)
+    const docSnap = await getDocs(resourceRef)
 
     if (docSnap.empty) return []
 
-    const all = docSnap.docs.map(doc => ({ ...doc.data(), id: doc.id }))
+    const all = docSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
 
     commit('setItems', { resource, items: all })
 
@@ -71,7 +92,10 @@ export default {
 
     return thread
   },
-  createThread: async ({ commit, state, dispatch }, { title, text, forumId }) => {
+  createThread: async (
+    { commit, state, dispatch },
+    { title, text, forumId }
+  ) => {
     const publishedAt = Math.floor(Date.now() / 1000) // in secs.
     const userId = state.authId
     const id = 'thread-' + Math.random()
@@ -84,20 +108,50 @@ export default {
 
     return findById(state.threads, thread.id)
   },
-  createPost: ({ commit, state }, post) => {
-    post.id = 'post-' + Math.random() // temp dev value (could also use a package to generate ids). In real world, value should be generated from DB.
+  createPost: async ({ commit, state }, { post }) => {
     post.userId = state.authId
+    console.log(post)
     post.publishedAt = Math.floor(Date.now() / 1000) // in secs.
 
-    commit('setItem', { resource: 'posts', item: post })
-    commit('appendPostToThread', {
-      childId: post.id,
-      parentId: post.threadId
-    })
-    commit('appendContributorToThread', {
-      childId: state.authId,
-      parentId: post.threadId
-    })
+    try {
+      /* const postsRef = collection(db, 'posts')
+      const newPost = await addDoc(postsRef, post)
+
+      const threadRef = doc(db, 'threads', post.threadId)
+      updateDoc(threadRef, {
+        posts: arrayUnion(newPost.id),
+        contributors: arrayUnion(post.userId)
+      }) */
+
+      // Firestore
+      // chainable batch
+      const postRef = doc(collection(db, 'posts'))
+      const threadRef = doc(db, 'threads', post.threadId)
+      await writeBatch(db)
+        .set(postRef, post)
+        .update(threadRef, {
+          posts: arrayUnion(postRef.id),
+          contributors: arrayUnion(post.userId)
+        })
+        .commit() // async request
+
+      // local store state
+      commit('setItem', {
+        resource: 'posts',
+        item: { ...post, id: postRef.id }
+      })
+      commit('appendPostToThread', {
+        childId: postRef.id,
+        parentId: post.threadId
+      })
+      commit('appendContributorToThread', {
+        childId: post.userId,
+        parentId: post.threadId
+      })
+    } catch (err) {
+      console.error(err)
+    }
   },
-  updateUser: ({ commit }, user) => commit('setItem', { resource: 'users', item: user })
+  updateUser: ({ commit }, user) =>
+    commit('setItem', { resource: 'users', item: user })
 }
