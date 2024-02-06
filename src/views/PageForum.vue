@@ -51,7 +51,7 @@ export default {
       <div class="forum-list"></div>
     </div>
   </div>
-  <ThreadList :threads="forumThreads" />
+  <ThreadList v-if="forumThreads" :threads="forumThreads" />
 </template>
 
 <style scoped></style>

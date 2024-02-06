@@ -11,8 +11,8 @@ import {
   addDoc,
   updateDoc,
   arrayUnion,
-  writeBatch,
-  serverTimestamp
+  serverTimestamp,
+  writeBatch
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
 
@@ -97,36 +97,78 @@ export default {
   },
   createThread: async (
     { commit, state, dispatch },
-    { title, text, forumId }
+    { forumId, text, title }
   ) => {
-    const publishedAt = Math.floor(Date.now() / 1000) // in secs.
+    const publishedAt = serverTimestamp()
     const userId = state.authId
-    const id = 'thread-' + Math.random()
-    const thread = { forumId, title, publishedAt, userId, id }
+    const thread = { forumId, publishedAt, title, userId }
 
-    commit('setItem', { resource: 'threads', item: thread })
-    commit('appendThreadToForum', { parentId: forumId, childId: thread.id })
-    commit('appendThreadToUser', { parentId: userId, childId: thread.id })
-    dispatch('createPost', { text, threadId: thread.id })
+    try {
+      // --- Firestore.
+      // chaninable batch.
+      const newThreadRef = doc(collection(db, 'threads'))
+      const forumRef = doc(db, 'forums', forumId)
+      const userRef = doc(db, 'users', userId)
+      await writeBatch(db)
+        .set(newThreadRef, thread) // add new thread to threads.
+        .update(forumRef, {
+          threads: arrayUnion(newThreadRef.id) // append the new thread id to the forum.
+        })
+        .update(userRef, {
+          threads: arrayUnion(newThreadRef.id) // append the new thread id to the user.
+        })
+        .commit()
 
-    return findById(state.threads, thread.id)
+      // const threadsRef = collection(db, 'threads')
+      // const newThreadRef = await addDoc(threadsRef, thread) // add new thread to threads.
+      // const userRef = doc(db, 'users', userId)
+      // updateDoc(userRef, {
+      //   threads: arrayUnion(newThreadRef.id) // append the new thread id to the user.
+      // })
+      // const forumRef = doc(db, 'forums', forumId)
+      // updateDoc(forumRef, {
+      //   threads: arrayUnion(newThreadRef.id) // append the new thread id to the forum.
+      // })
+
+      const post = { text, threadId: newThreadRef.id }
+      await dispatch('createPost', { post }) // add the initial post of the new thread to posts.
+
+      // --- local state
+      const threadDoc = (await getDoc(newThreadRef)).data() // to store same data to local state as in Firestore (i.e. timestamp).
+      commit('setItem', {
+        resource: 'threads',
+        item: { ...threadDoc, id: newThreadRef.id }
+      })
+      commit('appendThreadToForum', {
+        parentId: forumId,
+        childId: newThreadRef.id
+      })
+      commit('appendThreadToUser', {
+        parentId: userId,
+        childId: newThreadRef.id
+      })
+
+      return findById(state.threads, newThreadRef.id)
+    } catch (err) {
+      console.error(err)
+    }
   },
   createPost: async ({ commit, state }, { post }) => {
     post.userId = state.authId
-    post.publishedAt = serverTimestamp() // in secs.
+    post.publishedAt = serverTimestamp()
 
     try {
-      // Firestore
+      // --- Firestore
       const postsRef = collection(db, 'posts')
-      const newPostRef = await addDoc(postsRef, post)
+      const newPostRef = await addDoc(postsRef, post) // add the new post to posts.
 
       const threadRef = doc(db, 'threads', post.threadId)
       updateDoc(threadRef, {
-        posts: arrayUnion(newPostRef.id),
-        contributors: arrayUnion(post.userId)
+        posts: arrayUnion(newPostRef.id), // append the new post id to the thread posts.
+        contributors: arrayUnion(post.userId) // append the user id to the thread contributors.
       })
 
-      // local state
+      // --- local state
       const postDoc = (await getDoc(newPostRef)).data() // to store same data to local state as in Firestore (i.e. timestamp).
       commit('setItem', {
         resource: 'posts',
@@ -140,30 +182,6 @@ export default {
         childId: postDoc.userId,
         parentId: postDoc.threadId
       })
-      // chainable batch
-      /* const newPostRef = doc(collection(db, 'posts'))
-      const threadRef = doc(db, 'threads', post.threadId)
-      await writeBatch(db)
-        .set(newPostRef, post)
-        .update(threadRef, {
-          posts: arrayUnion(newPostRef.id),
-          contributors: arrayUnion(post.userId)
-        })
-        .commit() // async request
-
-      // local state
-      commit('setItem', {
-        resource: 'posts',
-        item: { ...post, id: newPostRef.id }
-      })
-      commit('appendPostToThread', {
-        childId: newPostRef.id,
-        parentId: post.threadId
-      })
-      commit('appendContributorToThread', {
-        childId: post.userId,
-        parentId: post.threadId
-      }) */
     } catch (err) {
       console.error(err)
     }

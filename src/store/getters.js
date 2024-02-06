@@ -40,10 +40,10 @@ export default {
           return findById(state.users, thread.userId)
         },
         get repliesCount () {
-          return thread.posts.length - 1 // -1 since 1st post is of the thread and not a reply.
+          return thread.posts?.length - 1 || 0 // -1: since the 1st post is not of a reply but an inital post of the thread.
         },
         get contributorsCount () {
-          return thread.contributors.length
+          return thread.contributors?.length || 0
         }
       }
     }
