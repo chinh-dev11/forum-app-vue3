@@ -8,8 +8,11 @@ import {
   getDocs,
   getDoc,
   doc,
+  addDoc,
+  updateDoc,
   arrayUnion,
-  writeBatch
+  writeBatch,
+  serverTimestamp
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
 
@@ -110,43 +113,57 @@ export default {
   },
   createPost: async ({ commit, state }, { post }) => {
     post.userId = state.authId
-    post.publishedAt = Math.floor(Date.now() / 1000) // in secs.
+    post.publishedAt = serverTimestamp() // in secs.
 
     try {
-      /* const postsRef = collection(db, 'posts')
-      const newPost = await addDoc(postsRef, post)
+      // Firestore
+      const postsRef = collection(db, 'posts')
+      const newPostRef = await addDoc(postsRef, post)
 
       const threadRef = doc(db, 'threads', post.threadId)
       updateDoc(threadRef, {
-        posts: arrayUnion(newPost.id),
+        posts: arrayUnion(newPostRef.id),
         contributors: arrayUnion(post.userId)
-      }) */
+      })
 
-      // Firestore
+      // local state
+      const postDoc = (await getDoc(newPostRef)).data() // to store same data to local state as in Firestore (i.e. timestamp).
+      commit('setItem', {
+        resource: 'posts',
+        item: { ...postDoc, id: newPostRef.id }
+      })
+      commit('appendPostToThread', {
+        childId: newPostRef.id,
+        parentId: postDoc.threadId
+      })
+      commit('appendContributorToThread', {
+        childId: postDoc.userId,
+        parentId: postDoc.threadId
+      })
       // chainable batch
-      const postRef = doc(collection(db, 'posts'))
+      /* const newPostRef = doc(collection(db, 'posts'))
       const threadRef = doc(db, 'threads', post.threadId)
       await writeBatch(db)
-        .set(postRef, post)
+        .set(newPostRef, post)
         .update(threadRef, {
-          posts: arrayUnion(postRef.id),
+          posts: arrayUnion(newPostRef.id),
           contributors: arrayUnion(post.userId)
         })
         .commit() // async request
 
-      // local store state
+      // local state
       commit('setItem', {
         resource: 'posts',
-        item: { ...post, id: postRef.id }
+        item: { ...post, id: newPostRef.id }
       })
       commit('appendPostToThread', {
-        childId: postRef.id,
+        childId: newPostRef.id,
         parentId: post.threadId
       })
       commit('appendContributorToThread', {
         childId: post.userId,
         parentId: post.threadId
-      })
+      }) */
     } catch (err) {
       console.error(err)
     }

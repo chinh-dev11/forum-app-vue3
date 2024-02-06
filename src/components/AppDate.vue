@@ -8,25 +8,27 @@ dayjs.extend(localizedDate)
 export default {
   props: {
     timestamp: {
-      type: Number, // secs in Unix format.
+      type: [Number, Object], // secs in Unix format.
       default: null
     }
   },
-  methods: {
-    dateFromNow () {
-      return dayjs.unix(this.timestamp).fromNow() // e.g. 3 years ago.
+  computed: {
+    normalizedTimestamp () {
+      return this.timestamp?.seconds || this.timestamp
     },
-
+    dateFromNow () {
+      return dayjs.unix(this.normalizedTimestamp).fromNow() // e.g. 3 years ago.
+    },
     humanReadableDate () {
-      return dayjs.unix(this.timestamp).format('llll') // e.g. Thu, Aug 16, 2018 8:02 PM.
+      return dayjs.unix(this.normalizedTimestamp).format('llll') // e.g. Thu, Aug 16, 2018 8:02 PM.
     }
   }
 }
 </script>
 
 <template>
-  <span v-if="timestamp" :title="humanReadableDate()">
-    {{ dateFromNow() }}.
+  <span :title="humanReadableDate">
+    {{ dateFromNow }}.
   </span>
 </template>
 
