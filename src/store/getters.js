@@ -13,17 +13,14 @@ export default {
       return {
         ...user,
         // 'get' acts as a property. e.g. user.posts
-        get posts () {
-          return state.posts.filter(({ userId }) => userId === user.id)
-        },
         get postsCount () {
-          return this.posts.length
+          return user.postsCount || 0
         },
         get threads () {
           return state.threads.filter(({ userId }) => userId === user.id)
         },
         get threadsCount () {
-          return this.threads.length
+          return user.threads.length || 0
         }
       }
     }

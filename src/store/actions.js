@@ -12,7 +12,8 @@ import {
   updateDoc,
   arrayUnion,
   serverTimestamp,
-  writeBatch
+  writeBatch,
+  increment
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
 
@@ -105,6 +106,17 @@ export default {
 
     try {
       // --- Firestore.
+      // const threadsRef = collection(db, 'threads')
+      // const newThreadRef = await addDoc(threadsRef, thread) // add new thread to threads.
+      // const userRef = doc(db, 'users', userId)
+      // updateDoc(userRef, {
+      //   threads: arrayUnion(newThreadRef.id) // append the new thread id to the user.
+      // })
+      // const forumRef = doc(db, 'forums', forumId)
+      // updateDoc(forumRef, {
+      //   threads: arrayUnion(newThreadRef.id) // append the new thread id to the forum.
+      // })
+
       // chaninable batch.
       const newThreadRef = doc(collection(db, 'threads'))
       const forumRef = doc(db, 'forums', forumId)
@@ -118,17 +130,6 @@ export default {
           threads: arrayUnion(newThreadRef.id) // append the new thread id to the user.
         })
         .commit()
-
-      // const threadsRef = collection(db, 'threads')
-      // const newThreadRef = await addDoc(threadsRef, thread) // add new thread to threads.
-      // const userRef = doc(db, 'users', userId)
-      // updateDoc(userRef, {
-      //   threads: arrayUnion(newThreadRef.id) // append the new thread id to the user.
-      // })
-      // const forumRef = doc(db, 'forums', forumId)
-      // updateDoc(forumRef, {
-      //   threads: arrayUnion(newThreadRef.id) // append the new thread id to the forum.
-      // })
 
       const post = { text, threadId: newThreadRef.id }
       await dispatch('createPost', { post }) // add the initial post of the new thread to posts.
@@ -153,7 +154,7 @@ export default {
       console.error(err)
     }
   },
-  createPost: async ({ commit, state }, { post }) => {
+  createPost: async ({ dispatch, commit, state }, { post }) => {
     post.userId = state.authId
     post.publishedAt = serverTimestamp()
 
@@ -166,6 +167,11 @@ export default {
       updateDoc(threadRef, {
         posts: arrayUnion(newPostRef.id), // append the new post id to the thread posts.
         contributors: arrayUnion(post.userId) // append the user id to the thread contributors.
+      })
+
+      const userRef = doc(db, 'users', post.userId)
+      updateDoc(userRef, {
+        postsCount: increment(1) // increment at every post creation
       })
 
       // --- local state
@@ -182,6 +188,7 @@ export default {
         childId: postDoc.userId,
         parentId: postDoc.threadId
       })
+      dispatch('fetchItem', { resource: 'users', id: userRef.id }) // fetch the post's user to get the new postsCount.
     } catch (err) {
       console.error(err)
     }

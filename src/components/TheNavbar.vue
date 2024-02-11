@@ -27,7 +27,6 @@ export default {
         <li v-if="authUser" class="navbar-user">
           <router-link
             :to="{ name: 'Profile', params: { id: authUser.id } }"
-            href="#"
           >
             <img
               class="avatar-small"
