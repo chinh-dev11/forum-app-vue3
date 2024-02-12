@@ -25,9 +25,7 @@ export default {
     <nav class="navbar">
       <ul>
         <li v-if="authUser" class="navbar-user">
-          <router-link
-            :to="{ name: 'Profile', params: { id: authUser.id } }"
-          >
+          <router-link :to="{ name: 'Profile' }">
             <img
               class="avatar-small"
               :src="authUser.avatar"
@@ -62,17 +60,17 @@ export default {
           <router-link :to="{ name: 'Home' }">Home</router-link>
         </li>
         <li class="navbar-item">
-          <router-link :to="{ name: 'Category', params: { id: 'nonexistent' } }"
+          <router-link :to="{ name: 'Category', params: { catId: 'nonexistent' } }"
             >Category</router-link
           >
         </li>
         <li class="navbar-item">
-          <router-link :to="{ name: 'Forum', params: { id: 'nonexistent' } }"
+          <router-link :to="{ name: 'Forum', params: { forumId: 'nonexistent' } }"
             >Forum</router-link
           >
         </li>
         <li class="navbar-item">
-          <router-link :to="{ name: 'Thread', params: { id: 'nonexistent' } }"
+          <router-link :to="{ name: 'Thread', params: { threadId: 'nonexistent' } }"
             >Thread</router-link
           >
         </li>

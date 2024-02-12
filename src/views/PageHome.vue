@@ -13,7 +13,6 @@ export default {
     ...mapActions(['fetchAllCategories'])
   },
   created () {
-    // fetch all categories
     this.fetchAllCategories()
   }
 }

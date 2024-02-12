@@ -33,7 +33,7 @@ export default {
 
       <hr />
 
-      <PostList :posts="user.posts" />
+      <PostList :posts="user.posts || []" />
       <!-- <div class="activity-list">
         <div class="activity">
           <div class="activity-header">

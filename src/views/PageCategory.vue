@@ -6,14 +6,14 @@ import { mapActions } from 'vuex'
 export default {
   components: { ForumList },
   props: {
-    id: {
+    catId: {
       type: String,
       required: true
     }
   },
   computed: {
     category () {
-      return findById(this.$store.state.categories, this.id) || {}
+      return findById(this.$store.state.categories, this.catId) || {}
     },
     categoryForums () {
       return this.$store.state.forums.filter(({ categoryId }) => categoryId === this.category.id)
@@ -23,7 +23,7 @@ export default {
     ...mapActions(['fetchCategory', 'fetchForums'])
   },
   async created () {
-    const category = await this.fetchCategory({ id: this.id })
+    const category = await this.fetchCategory({ id: this.catId })
     this.fetchForums({ ids: category.forums })
   }
 }

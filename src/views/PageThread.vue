@@ -7,14 +7,14 @@ import { flatFilterValues } from '@/helpers'
 export default {
   components: { PostList, PostEditor },
   props: {
-    id: {
+    threadId: {
       type: String,
       required: true
     }
   },
   computed: {
     thread () {
-      return this.$store.getters.thread(this.id)
+      return this.$store.getters.thread(this.threadId)
     },
     threadPosts () {
       return this.$store.state.posts.filter(({ threadId }) => threadId === this.thread.id)
@@ -34,7 +34,7 @@ export default {
   // using created to ensure the reactivity of the computed props, instead of beforeCreate hook.
   async created () {
     // fetch thread
-    const thread = await this.fetchThread({ id: this.id })
+    const thread = await this.fetchThread({ id: this.threadId })
 
     // fetch posts
     const posts = await this.fetchPosts({ ids: thread.posts })
@@ -52,7 +52,7 @@ export default {
       {{ thread.title }}
       <!-- event and tag props are deprecated. Use scoped slots instead. -->
       <router-link
-        :to="{ name: 'ThreadEdit', params: { id: thread.id } }"
+        :to="{ name: 'ThreadEdit', params: { threadId: thread.id } }"
         v-slot="{ navigate }"
         class="btn-green btn-small"
         ><button @click="navigate" role="link">Edit Thread</button></router-link

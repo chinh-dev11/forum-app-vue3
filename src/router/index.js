@@ -24,14 +24,14 @@ const routes = [
   },
   {
     name: 'Category',
-    path: '/category/:id',
+    path: '/category/:catId',
     component: PageCategory,
     props: true
   },
-  { name: 'Forum', path: '/forum/:id', component: PageForum, props: true },
+  { name: 'Forum', path: '/forum/:forumId', component: PageForum, props: true },
   {
     name: 'Thread',
-    path: '/thread/:id',
+    path: '/thread/:threadId',
     component: PageThread,
     props: true
     // TODO: find a better solution of route guarding
@@ -60,7 +60,7 @@ const routes = [
   },
   {
     name: 'ThreadEdit',
-    path: '/thread/:id/edit',
+    path: '/thread/:threadId/edit',
     component: PageThreadEdit,
     props: true
   },

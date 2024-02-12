@@ -30,7 +30,7 @@ export default {
   <div class="thread">
     <div>
       <p>
-        <router-link :to="{ name: 'Thread', params: { id: userThread.id } }">{{
+        <router-link :to="{ name: 'Thread', params: { threadId: userThread.id } }">{{
           userThread.title
         }}</router-link>
       </p>

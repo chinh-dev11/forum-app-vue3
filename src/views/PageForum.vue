@@ -6,14 +6,14 @@ import { mapActions } from 'vuex'
 export default {
   components: { ThreadList },
   props: {
-    id: {
+    forumId: {
       type: String,
       required: true
     }
   },
   computed: {
     forum () {
-      return findById(this.$store.state.forums, this.id) || {}
+      return findById(this.$store.state.forums, this.forumId) || {}
     },
     forumThreads () {
       return this.forum.threads?.map((threadId) =>
@@ -25,7 +25,7 @@ export default {
     ...mapActions(['fetchForum', 'fetchThreads'])
   },
   async created () {
-    const forum = await this.fetchForum({ id: this.id })
+    const forum = await this.fetchForum({ id: this.forumId })
     this.fetchThreads({ ids: forum.threads })
   }
 }
@@ -51,7 +51,7 @@ export default {
       <div class="forum-list"></div>
     </div>
   </div>
-  <ThreadList v-if="forumThreads" :threads="forumThreads" />
+  <ThreadList :threads="forumThreads" />
 </template>
 
 <style scoped></style>
