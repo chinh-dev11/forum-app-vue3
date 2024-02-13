@@ -1,5 +1,15 @@
 <script>
+import PostEditor from '@/components/PostEditor.vue'
+
 export default {
+  components: {
+    PostEditor
+  },
+  data () {
+    return {
+      isEditing: false
+    }
+  },
   props: {
     post: {
       type: Object,
@@ -9,6 +19,11 @@ export default {
   computed: {
     user () {
       return this.$store.getters.user(this.post.userId) || {}
+    }
+  },
+  methods: {
+    setEditing () {
+      this.isEditing = !this.isEditing
     }
   }
 }
@@ -29,16 +44,18 @@ export default {
       </p>
     </div>
     <div class="post-content">
-      <div>
+      <div v-if="!isEditing">
         <p>{{ post.text }}</p>
       </div>
-      <a
-        href="#"
+      <PostEditor v-else :text="post.text" />
+      <button
+        @click="setEditing"
         style="margin-left: auto"
         class="link-unstyled"
         title="Make a change"
-        ><i class="fa fa-pencil"></i
-      ></a>
+      >
+        <i><FA icon="fa-pencil" /></i>
+      </button>
     </div>
     <div class="post-date text-faded">
       <AppDate :timestamp="post.publishedAt" />
