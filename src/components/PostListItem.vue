@@ -5,25 +5,34 @@ export default {
   components: {
     PostEditor
   },
-  data () {
-    return {
-      isEditing: false
-    }
-  },
   props: {
     post: {
       type: Object,
       required: true
+    },
+    editing: {
+      type: String,
+      required: true
     }
   },
+  emits: ['update:editing'],
   computed: {
     user () {
       return this.$store.getters.user(this.post.userId) || {}
+    },
+    // use writable computed to mutate prop
+    editingMode: {
+      get () {
+        return this.editing
+      },
+      set (val) {
+        this.$emit('update:editing', val)
+      }
     }
   },
   methods: {
-    setEditing () {
-      this.isEditing = !this.isEditing
+    toggleEditMode (postId) {
+      this.editingMode = this.editingMode === postId ? '' : postId
     }
   }
 }
@@ -44,12 +53,12 @@ export default {
       </p>
     </div>
     <div class="post-content">
-      <div v-if="!isEditing">
+      <PostEditor v-if="editing === post.id" :post="post" />
+      <div v-else>
         <p>{{ post.text }}</p>
       </div>
-      <PostEditor v-else :text="post.text" />
       <button
-        @click="setEditing"
+        @click="toggleEditMode(post.id)"
         style="margin-left: auto"
         class="link-unstyled"
         title="Make a change"

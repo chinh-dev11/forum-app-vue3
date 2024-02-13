@@ -8,14 +8,19 @@ export default {
       type: Array,
       required: true
     }
+  },
+  data () {
+    return {
+      editing: ''
+    }
   }
 }
 </script>
 
 <template>
-    <div class="post-list">
-      <PostListItem v-for="post in posts" :key="post.id" :post="post" />
-    </div>
+  <div class="post-list">
+    <PostListItem v-for="post in posts" :key="post.id" :post="post" v-model:editing="editing" />
+  </div>
 </template>
 
 <style scoped>
