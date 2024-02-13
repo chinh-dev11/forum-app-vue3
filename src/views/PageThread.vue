@@ -1,45 +1,47 @@
 <script>
 import PostList from '@/components/PostList.vue'
 import PostEditor from '@/components/PostEditor.vue'
+import { mapActions } from 'vuex'
+import { flatFilterValues } from '@/helpers'
 
 export default {
   components: { PostList, PostEditor },
   props: {
-    id: {
+    threadId: {
       type: String,
       required: true
     }
   },
   computed: {
     thread () {
-      return this.$store.getters.thread(this.id)
+      return this.$store.getters.thread(this.threadId)
     },
     threadPosts () {
       return this.$store.state.posts.filter(({ threadId }) => threadId === this.thread.id)
     }
   },
   methods: {
+    ...mapActions(['createPost', 'fetchThread', 'fetchPosts', 'fetchUsers']),
     addPost (eventData) {
       const post = {
         ...eventData.post,
         threadId: this.thread.id
       }
 
-      this.$store.dispatch('createPost', { post })
+      this.createPost({ post })
     }
   },
   // using created to ensure the reactivity of the computed props, instead of beforeCreate hook.
   async created () {
     // fetch thread
-    const thread = await this.$store.dispatch('fetchThread', { id: this.id })
-
-    // fetch user
-    this.$store.dispatch('fetchUser', { id: thread.userId })
+    const thread = await this.fetchThread({ id: this.threadId })
 
     // fetch posts
-    const posts = await this.$store.dispatch('fetchPosts', { ids: thread.posts })
-    // fetch the posts associated users
-    this.$store.dispatch('fetchUsers', { ids: posts.map(({ userId }) => userId) })
+    const posts = await this.fetchPosts({ ids: thread.posts })
+
+    // fetch the posts associated users and the thread user
+    const users = flatFilterValues(posts.map(({ userId }) => userId).concat(thread.userId))
+    this.fetchUsers({ ids: users })
   }
 }
 </script>
@@ -50,7 +52,7 @@ export default {
       {{ thread.title }}
       <!-- event and tag props are deprecated. Use scoped slots instead. -->
       <router-link
-        :to="{ name: 'ThreadEdit', params: { id: thread.id } }"
+        :to="{ name: 'ThreadEdit', params: { threadId: thread.id } }"
         v-slot="{ navigate }"
         class="btn-green btn-small"
         ><button @click="navigate" role="link">Edit Thread</button></router-link

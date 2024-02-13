@@ -21,7 +21,7 @@ export default {
   <div class="col-full">
     <div class="forum-list">
       <h2 class="list-title">
-        <router-link v-if="categoryId" :to="{ name: 'Category', params: { id: categoryId } }">{{
+        <router-link v-if="categoryId" :to="{ name: 'Category', params: { catId: categoryId } }">{{
           title
         }}</router-link>
         <span v-else>{{ title }}</span>
@@ -29,7 +29,7 @@ export default {
       <div v-for="forum in forums" :key="forum.id" class="forum-listing">
         <div class="forum-details">
           <router-link
-            :to="{ name: 'Forum', params: { id: forum.id } }"
+            :to="{ name: 'Forum', params: { forumId: forum.id } }"
             class="text-xlarge"
             >{{ forum.name }}</router-link
           >

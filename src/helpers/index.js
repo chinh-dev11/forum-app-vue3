@@ -22,7 +22,14 @@ const flatFilterValues = (values) => {
   return [...new Set(values.flat().filter(value => value))]
 }
 
+const docToResource = (doc) => {
+  if (typeof doc?.data !== 'function') return doc
+
+  return { ...doc.data(), id: doc.id }
+}
+
 export {
+  docToResource,
   flatFilterValues,
   upSert,
   filterById,

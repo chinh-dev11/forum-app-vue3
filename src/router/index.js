@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import PageHome from '@/views/PageHome.vue'
-import PageThreadShow from '@/views/PageThreadShow.vue'
+import PageThread from '@/views/PageThread.vue'
 import PageNotFound from '@/views/PageNotFound.vue'
 import PageForum from '@/views/PageForum.vue'
 import PageCategory from '@/views/PageCategory.vue'
@@ -24,15 +24,15 @@ const routes = [
   },
   {
     name: 'Category',
-    path: '/category/:id',
+    path: '/category/:catId',
     component: PageCategory,
     props: true
   },
-  { name: 'Forum', path: '/forum/:id', component: PageForum, props: true },
+  { name: 'Forum', path: '/forum/:forumId', component: PageForum, props: true },
   {
-    name: 'ThreadShow',
-    path: '/thread/:id',
-    component: PageThreadShow,
+    name: 'Thread',
+    path: '/thread/:threadId',
+    component: PageThread,
     props: true
     // TODO: find a better solution of route guarding
     /* beforeEnter (to, from, next) {
@@ -60,7 +60,7 @@ const routes = [
   },
   {
     name: 'ThreadEdit',
-    path: '/thread/:id/edit',
+    path: '/thread/:threadId/edit',
     component: PageThreadEdit,
     props: true
   },

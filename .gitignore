@@ -2,6 +2,7 @@
 node_modules
 /dist
 NOTES.md
+*.old.*
 *.bk.*
 *.orig.*
 *copy*
