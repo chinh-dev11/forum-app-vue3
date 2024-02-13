@@ -27,7 +27,7 @@ export default {
 </script>
 
 <template>
-  <div class="thread">
+  <div v-if="userThread.id" class="thread">
     <div>
       <p>
         <router-link :to="{ name: 'Thread', params: { threadId: userThread.id } }">{{

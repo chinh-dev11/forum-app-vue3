@@ -1,4 +1,4 @@
-import { findById } from '@/helpers'
+import { docToResource, findById } from '@/helpers'
 
 // --- Firebase ---
 import { initializeApp } from 'firebase/app'
@@ -46,7 +46,7 @@ export default {
 
     if (!docSnap.exists()) return {}
 
-    const item = { ...docSnap.data(), id: docSnap.id }
+    const item = docToResource(docSnap)
 
     commit('setItem', { resource, item })
 
@@ -78,7 +78,7 @@ export default {
 
     if (docSnap.empty) return []
 
-    const all = docSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+    const all = docSnap.docs.map((doc) => (docToResource(doc)))
 
     commit('setItems', { resource, items: all })
 
@@ -86,15 +86,29 @@ export default {
   },
 
   // ------ Create/Update resource
-  updateThread: async ({ commit, state }, { title, text, id }) => {
-    const thread = findById(state.threads, id)
+  updateThread: async ({ state }, { title, text, id }) => {
+    const { id: threadId, posts: threadPosts } = findById(state.threads, id)
     // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
-    const post = findById(state.posts, thread.posts[0])
+    const { id: postId } = findById(state.posts, threadPosts[0])
 
-    commit('setItem', { resource: 'threads', item: { ...thread, title } })
-    commit('setItem', { resource: 'posts', item: { ...post, text } })
+    try {
+      // --- Firestore
+      const threadRef = doc(db, 'threads', threadId)
+      const postRef = doc(db, 'posts', postId)
 
-    return thread
+      await writeBatch(db)
+        .update(threadRef, {
+          title
+        })
+        .update(postRef, {
+          text
+        })
+        .commit()
+
+      return threadId
+    } catch (err) {
+      console.error(err)
+    }
   },
   createThread: async (
     { commit, state, dispatch },
@@ -105,22 +119,12 @@ export default {
     const thread = { forumId, publishedAt, title, userId }
 
     try {
-      // --- Firestore.
-      // const threadsRef = collection(db, 'threads')
-      // const newThreadRef = await addDoc(threadsRef, thread) // add new thread to threads.
-      // const userRef = doc(db, 'users', userId)
-      // updateDoc(userRef, {
-      //   threads: arrayUnion(newThreadRef.id) // append the new thread id to the user.
-      // })
-      // const forumRef = doc(db, 'forums', forumId)
-      // updateDoc(forumRef, {
-      //   threads: arrayUnion(newThreadRef.id) // append the new thread id to the forum.
-      // })
-
+      // --- Firestore
       // chaninable batch.
       const newThreadRef = doc(collection(db, 'threads'))
       const forumRef = doc(db, 'forums', forumId)
       const userRef = doc(db, 'users', userId)
+
       await writeBatch(db)
         .set(newThreadRef, thread) // add new thread to threads.
         .update(forumRef, {
@@ -131,15 +135,7 @@ export default {
         })
         .commit()
 
-      const post = { text, threadId: newThreadRef.id }
-      await dispatch('createPost', { post }) // add the initial post of the new thread to posts.
-
       // --- local state
-      const threadDoc = (await getDoc(newThreadRef)).data() // to store same data to local state as in Firestore (i.e. timestamp).
-      commit('setItem', {
-        resource: 'threads',
-        item: { ...threadDoc, id: newThreadRef.id }
-      })
       commit('appendThreadToForum', {
         parentId: forumId,
         childId: newThreadRef.id
@@ -148,6 +144,16 @@ export default {
         parentId: userId,
         childId: newThreadRef.id
       })
+
+      // to store same data to local state as in Firestore (i.e. timestamp).
+      const threadDoc = (await getDoc(newThreadRef))
+      commit('setItem', {
+        resource: 'threads',
+        item: docToResource(threadDoc)
+      })
+
+      const post = { text, threadId: newThreadRef.id }
+      await dispatch('createPost', { post }) // add the initial post of the new thread to posts.
 
       return findById(state.threads, newThreadRef.id)
     } catch (err) {
@@ -188,6 +194,7 @@ export default {
         childId: postDoc.userId,
         parentId: postDoc.threadId
       })
+
       dispatch('fetchItem', { resource: 'users', id: userRef.id }) // fetch the post's user to get the new postsCount.
     } catch (err) {
       console.error(err)

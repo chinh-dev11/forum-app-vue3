@@ -25,10 +25,10 @@ export default {
         forumId: this.forum.id
       })
 
-      this.$router.push({ name: 'Thread', params: { id: thread.id } })
+      this.$router.push({ name: 'Thread', params: { threadId: thread.id } })
     },
     cancel () {
-      this.$router.push({ name: 'Forum', params: { id: this.forum.id } })
+      this.$router.push({ name: 'Forum', params: { forumId: this.forum.id } })
     }
   },
   created () {
