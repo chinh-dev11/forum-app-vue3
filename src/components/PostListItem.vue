@@ -1,5 +1,6 @@
 <script>
 import PostEditor from '@/components/PostEditor.vue'
+import { mapActions } from 'vuex'
 
 export default {
   components: {
@@ -15,7 +16,6 @@ export default {
       required: true
     }
   },
-  emits: ['update:editing'],
   computed: {
     user () {
       return this.$store.getters.user(this.post.userId) || {}
@@ -31,8 +31,14 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['updatePost']),
     toggleEditMode (postId) {
       this.editingMode = this.editingMode === postId ? '' : postId
+    },
+    async savePost ({ post }) {
+      await this.updatePost({ id: post.id, text: post.text })
+
+      this.editingMode = '' // close editor
     }
   }
 }
@@ -53,7 +59,7 @@ export default {
       </p>
     </div>
     <div class="post-content">
-      <PostEditor v-if="editing === post.id" :post="post" />
+      <PostEditor v-if="editing === post.id" :post="post" @save="savePost" />
       <div v-else>
         <p>{{ post.text }}</p>
       </div>
@@ -67,6 +73,7 @@ export default {
       </button>
     </div>
     <div class="post-date text-faded">
+      <div v-if="post.edited?.at" class="edition-info">edited!</div>
       <AppDate :timestamp="post.publishedAt" />
     </div>
   </div>

@@ -17,30 +17,25 @@ export default {
       return this.$store.getters.thread(this.threadId)
     },
     threadPosts () {
-      return this.$store.state.posts.filter(({ threadId }) => threadId === this.thread.id)
+      return this.$store.state.posts.filter(
+        ({ threadId }) => threadId === this.thread.id
+      )
     }
   },
   methods: {
     ...mapActions(['createPost', 'fetchThread', 'fetchPosts', 'fetchUsers']),
-    addPost (eventData) {
-      const post = {
-        ...eventData.post,
-        threadId: this.thread.id
-      }
-
-      this.createPost({ post })
+    savePost ({ post }) {
+      this.createPost({ post: { ...post, threadId: this.thread.id } })
     }
   },
   // using created to ensure the reactivity of the computed props, instead of beforeCreate hook.
   async created () {
-    // fetch thread
     const thread = await this.fetchThread({ id: this.threadId })
-
-    // fetch posts
     const posts = await this.fetchPosts({ ids: thread.posts })
-
     // fetch the posts associated users and the thread user
-    const users = flatFilterValues(posts.map(({ userId }) => userId).concat(thread.userId))
+    const users = flatFilterValues(
+      posts.map(({ userId }) => userId).concat(thread.userId)
+    )
     this.fetchUsers({ ids: users })
   }
 }
@@ -50,7 +45,6 @@ export default {
   <div class="col-large push-top">
     <h1>
       {{ thread.title }}
-      <!-- event and tag props are deprecated. Use scoped slots instead. -->
       <router-link
         :to="{ name: 'ThreadEdit', params: { threadId: thread.id } }"
         v-slot="{ navigate }"
@@ -74,7 +68,7 @@ export default {
       >
     </p>
     <PostList :posts="threadPosts" />
-    <PostEditor @save="addPost" />
+    <PostEditor @save="savePost" />
   </div>
 </template>
 

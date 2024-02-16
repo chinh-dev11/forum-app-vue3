@@ -78,7 +78,7 @@ export default {
 
     if (docSnap.empty) return []
 
-    const all = docSnap.docs.map((doc) => (docToResource(doc)))
+    const all = docSnap.docs.map((doc) => docToResource(doc))
 
     commit('setItems', { resource, items: all })
 
@@ -146,7 +146,7 @@ export default {
       })
 
       // to store same data to local state as in Firestore (i.e. timestamp).
-      const threadDoc = (await getDoc(newThreadRef))
+      const threadDoc = await getDoc(newThreadRef)
       commit('setItem', {
         resource: 'threads',
         item: docToResource(threadDoc)
@@ -160,11 +160,39 @@ export default {
       console.error(err)
     }
   },
-  createPost: async ({ dispatch, commit, state }, { post }) => {
-    post.userId = state.authId
-    post.publishedAt = serverTimestamp()
-
+  updatePost: async ({ dispatch, commit, state }, { id, text }) => {
+    console.log(id, text)
     try {
+      const post = {
+        text,
+        edited: {
+          at: serverTimestamp(),
+          by: state.authId,
+          moderated: false
+        }
+      }
+
+      // update Firestore
+      const postRef = doc(db, 'posts', id)
+      await updateDoc(postRef, {
+        ...post
+      })
+
+      // update local state
+      const updatedPost = await getDoc(postRef)
+      commit('setItem', { resource: 'posts', item: docToResource(updatedPost) })
+
+      // return true
+    } catch (err) {
+      console.error(err)
+    }
+  },
+  createPost: async ({ dispatch, commit, state }, { post }) => {
+    // TODO: postsCount is randomly reset to 1 (async issue???)
+    try {
+      post.userId = state.authId
+      post.publishedAt = serverTimestamp()
+
       // --- Firestore
       const postsRef = collection(db, 'posts')
       const newPostRef = await addDoc(postsRef, post) // add the new post to posts.

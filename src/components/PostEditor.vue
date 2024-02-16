@@ -11,9 +11,17 @@ export default {
       postCopy: { ...this.post }
     }
   },
+  computed: {
+    textChanged () {
+      return this.post.text !== this.postCopy.text
+    }
+  },
   methods: {
     save () {
-      this.$emit('save', { post: this.postCopy })
+      this.$emit('save', { post: { ...this.postCopy } })
+      this.postCopy.text = ''
+    },
+    reset () {
       this.postCopy.text = ''
     }
   }
@@ -33,10 +41,25 @@ export default {
       ></textarea>
     </div>
     <div class="btn-group">
-      <button v-if="!post.id" class="btn btn-ghost" type="reset">Cancel</button>
-      <button class="btn btn-blue" type="submit" name="Publish">{{ post.id ? 'Update' : 'Submit' }} Post</button>
+      <button
+        v-if="!post.id"
+        @click="reset"
+        :disabled="!textChanged"
+        class="btn btn-ghost"
+        type="reset"
+      >
+        Cancel
+      </button>
+      <button
+        :disabled="!textChanged"
+        class="btn btn-blue"
+        type="submit"
+        name="Publish"
+      >
+        {{ post.id ? "Update" : "Submit" }} Post
+      </button>
     </div>
   </form>
 </template>
 
-<style lang="scss" scoped></style>
+<style scoped></style>
