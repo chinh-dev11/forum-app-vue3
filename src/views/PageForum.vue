@@ -1,6 +1,5 @@
 <script>
 import ThreadList from '@/components/ThreadList.vue'
-import { findById } from '@/helpers'
 import { mapActions } from 'vuex'
 
 export default {
@@ -11,22 +10,21 @@ export default {
       required: true
     }
   },
-  computed: {
-    forum () {
-      return findById(this.$store.state.forums, this.forumId) || {}
-    },
-    forumThreads () {
-      return this.forum.threads?.map((threadId) =>
-        this.$store.getters.thread(threadId)
-      )
+  data () {
+    return {
+      forum: {},
+      forumThreads: []
     }
   },
   methods: {
-    ...mapActions(['fetchForum', 'fetchThreads'])
+    ...mapActions(['fetchForum', 'fetchThreads', 'fetchUsers'])
   },
   async created () {
-    const forum = await this.fetchForum({ id: this.forumId })
-    this.fetchThreads({ ids: forum.threads })
+    this.forum = await this.fetchForum({ id: this.forumId })
+    const threads = await this.fetchThreads({ ids: this.forum.threads })
+    this.forumThreads = threads.map(({ id }) => this.$store.getters.thread(id))
+    const userIds = [...new Set(threads.map(({ userId }) => userId))]
+    await this.fetchUsers({ ids: userIds })
   }
 }
 </script>
@@ -39,7 +37,6 @@ export default {
         <p class="text-lead">{{ forum.description }}</p>
       </div>
       <router-link
-        v-if="forum.id"
         :to="{ name: 'ThreadCreate', params: { forumId: forum.id } }"
         class="btn-green btn-small"
         >Start a thread
@@ -51,7 +48,7 @@ export default {
       <div class="forum-list"></div>
     </div>
   </div>
-  <ThreadList v-if="forumThreads?.length" :threads="forumThreads" />
+  <ThreadList :threads="forumThreads" />
 </template>
 
 <style scoped></style>

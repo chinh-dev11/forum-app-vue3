@@ -13,18 +13,19 @@ import {
   arrayUnion,
   serverTimestamp,
   writeBatch,
-  increment
+  increment,
+  onSnapshot
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
 
-// Initialize Firebase
+// Initialize Firebase.
 const app = initializeApp(firebaseConfig)
 
-// Initialize Cloud Firestore and get a reference to the service
+// Initialize Cloud Firestore and get a reference to the service.
 const db = getFirestore(app)
 
 export default {
-  // ------ Fetch single resource
+  // ------ Fetch single resource.
   fetchAuthUser: ({ dispatch, state }) =>
     dispatch('fetchUser', { id: state.authId }),
   fetchCategory: ({ dispatch }, { id }) =>
@@ -37,23 +38,34 @@ export default {
     dispatch('fetchItem', { resource: 'users', id }),
   fetchPost: ({ dispatch }, { id, emoji }) =>
     dispatch('fetchItem', { resource: 'posts', id, emoji }),
-  fetchItem: async ({ commit }, { resource, id, emoji }) => {
-    if (!id) return {}
+  // fetch the resource and subscribe for realtime updates
+  fetchItem: ({ commit }, { resource, id, emoji }) => {
+    return new Promise((resolve, reject) => {
+      // using upgrade Firestore modular API.
+      const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
+      const unsubscribe = onSnapshot(
+        resourceRef,
+        (snapshot) => {
+          if (!snapshot.exists()) return {}
 
-    // using upgrade Firestore modular API
-    const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
-    const docSnap = await getDoc(resourceRef)
+          const item = docToResource(snapshot)
 
-    if (!docSnap.exists()) return {}
+          // update local store state.
+          commit('setItem', { resource, item })
 
-    const item = docToResource(docSnap)
+          resolve(item)
+        },
+        (err) => {
+          console.error(err)
+          reject(err)
+        }
+      )
 
-    commit('setItem', { resource, item })
-
-    return item
+      commit('appendUnsubscribe', { unsubscribe }) // to be used to remove Firestore realtime updates listeners when route changes.
+    })
   },
 
-  // ------ Fetch multiple resources
+  // ------ Fetch multiple resources.
   fetchAllCategories: ({ dispatch }) =>
     dispatch('fetchAll', { resource: 'categories' }),
   fetchForums: ({ dispatch }, { ids }) =>
@@ -71,6 +83,7 @@ export default {
       ids.map((id) => dispatch('fetchItem', { resource, id, emoji }))
     )
   },
+  // fetch resources without listener for real-time updates
   fetchAll: async ({ commit }, { resource }) => {
     // using upgrade Firestore modular API
     const resourceRef = collection(db, resource)
@@ -78,14 +91,12 @@ export default {
 
     if (docSnap.empty) return []
 
-    const all = docSnap.docs.map((doc) => (docToResource(doc)))
+    const all = docSnap.docs.map((doc) => docToResource(doc))
 
     commit('setItems', { resource, items: all })
-
-    return all
   },
 
-  // ------ Create/Update resource
+  // ------ Create/Update resource.
   updateThread: async ({ state }, { title, text, id }) => {
     const { id: threadId, posts: threadPosts } = findById(state.threads, id)
     // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
@@ -146,7 +157,7 @@ export default {
       })
 
       // to store same data to local state as in Firestore (i.e. timestamp).
-      const threadDoc = (await getDoc(newThreadRef))
+      const threadDoc = await getDoc(newThreadRef)
       commit('setItem', {
         resource: 'threads',
         item: docToResource(threadDoc)
@@ -160,11 +171,41 @@ export default {
       console.error(err)
     }
   },
-  createPost: async ({ dispatch, commit, state }, { post }) => {
-    post.userId = state.authId
-    post.publishedAt = serverTimestamp()
-
+  updatePost: async ({ dispatch, commit, state }, { id, text }) => {
     try {
+      const post = {
+        text,
+        edited: {
+          at: serverTimestamp(),
+          by: state.authId,
+          moderated: false
+        }
+      }
+
+      // update Firestore
+      const postRef = doc(db, 'posts', id)
+      await updateDoc(postRef, {
+        ...post
+      })
+
+      // update local state
+      const updatedPost = await getDoc(postRef)
+      commit('setItem', {
+        resource: 'posts',
+        item: docToResource(updatedPost)
+      })
+
+      // return true
+    } catch (err) {
+      console.error(err)
+    }
+  },
+  createPost: async ({ dispatch, commit, state }, { post }) => {
+    // TODO: postsCount is randomly reset to 1 (async issue???)
+    try {
+      post.userId = state.authId
+      post.publishedAt = serverTimestamp()
+
       // --- Firestore
       const postsRef = collection(db, 'posts')
       const newPostRef = await addDoc(postsRef, post) // add the new post to posts.
@@ -201,5 +242,12 @@ export default {
     }
   },
   updateUser: ({ commit }, user) =>
-    commit('setItem', { resource: 'users', item: user })
+    commit('setItem', { resource: 'users', item: user }),
+
+  // ------ Memory leaks, performance issues.
+  // unregister Firestore realtime updates listeners (onSnapshot).
+  unsubscribeAllSnapshots: async ({ commit, state }) => {
+    state.unsubscribes.forEach((unsubscribe) => unsubscribe())
+    commit('clearAllSnapshots')
+  }
 }

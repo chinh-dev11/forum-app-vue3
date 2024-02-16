@@ -1,14 +1,44 @@
 <script>
+import PostEditor from '@/components/PostEditor.vue'
+import { mapActions } from 'vuex'
+
 export default {
+  components: {
+    PostEditor
+  },
   props: {
     post: {
       type: Object,
+      required: true
+    },
+    editing: {
+      type: String,
       required: true
     }
   },
   computed: {
     user () {
       return this.$store.getters.user(this.post.userId) || {}
+    },
+    // use writable computed to mutate prop
+    editingMode: {
+      get () {
+        return this.editing
+      },
+      set (val) {
+        this.$emit('update:editing', val)
+      }
+    }
+  },
+  methods: {
+    ...mapActions(['updatePost']),
+    toggleEditMode (postId) {
+      this.editingMode = this.editingMode === postId ? '' : postId
+    },
+    async savePost ({ post }) {
+      await this.updatePost({ id: post.id, text: post.text })
+
+      this.editingMode = '' // close editor
     }
   }
 }
@@ -29,18 +59,21 @@ export default {
       </p>
     </div>
     <div class="post-content">
-      <div>
+      <PostEditor v-if="editing === post.id" :post="post" @save="savePost" />
+      <div v-else>
         <p>{{ post.text }}</p>
       </div>
-      <a
-        href="#"
+      <button
+        @click="toggleEditMode(post.id)"
         style="margin-left: auto"
         class="link-unstyled"
         title="Make a change"
-        ><i class="fa fa-pencil"></i
-      ></a>
+      >
+        <i><FA icon="fa-pencil" /></i>
+      </button>
     </div>
     <div class="post-date text-faded">
+      <div v-if="post.edited?.at" class="edition-info">edited!</div>
       <AppDate :timestamp="post.publishedAt" />
     </div>
   </div>
