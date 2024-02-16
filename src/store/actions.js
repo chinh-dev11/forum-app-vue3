@@ -38,14 +38,13 @@ export default {
     dispatch('fetchItem', { resource: 'users', id }),
   fetchPost: ({ dispatch }, { id, emoji }) =>
     dispatch('fetchItem', { resource: 'posts', id, emoji }),
-  fetchItem: async ({ commit }, { resource, id, emoji }) => {
-    if (!id) return {}
-
+  // fetch the resource and subscribe for realtime updates
+  fetchItem: ({ commit }, { resource, id, emoji }) => {
     return new Promise((resolve, reject) => {
       // using upgrade Firestore modular API.
       const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
-
-      const unsubscribe = onSnapshot(resourceRef,
+      const unsubscribe = onSnapshot(
+        resourceRef,
         (snapshot) => {
           if (!snapshot.exists()) return {}
 
@@ -59,9 +58,10 @@ export default {
         (err) => {
           console.error(err)
           reject(err)
-        })
+        }
+      )
 
-      commit('appendUnsubscribe', { unsubscribe }) // for cleanup listeners when route changes.
+      commit('appendUnsubscribe', { unsubscribe }) // to be used to remove Firestore realtime updates listeners when route changes.
     })
   },
 
@@ -83,6 +83,7 @@ export default {
       ids.map((id) => dispatch('fetchItem', { resource, id, emoji }))
     )
   },
+  // fetch resources without listener for real-time updates
   fetchAll: async ({ commit }, { resource }) => {
     // using upgrade Firestore modular API
     const resourceRef = collection(db, resource)
@@ -93,8 +94,6 @@ export default {
     const all = docSnap.docs.map((doc) => docToResource(doc))
 
     commit('setItems', { resource, items: all })
-
-    return all
   },
 
   // ------ Create/Update resource.
@@ -191,7 +190,10 @@ export default {
 
       // update local state
       const updatedPost = await getDoc(postRef)
-      commit('setItem', { resource: 'posts', item: docToResource(updatedPost) })
+      commit('setItem', {
+        resource: 'posts',
+        item: docToResource(updatedPost)
+      })
 
       // return true
     } catch (err) {
@@ -245,7 +247,7 @@ export default {
   // ------ Memory leaks, performance issues.
   // unregister Firestore realtime updates listeners (onSnapshot).
   unsubscribeAllSnapshots: async ({ commit, state }) => {
-    state.unsubscribes.forEach(unsubscribe => unsubscribe())
+    state.unsubscribes.forEach((unsubscribe) => unsubscribe())
     commit('clearAllSnapshots')
   }
 }
