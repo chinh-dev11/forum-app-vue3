@@ -13,18 +13,19 @@ import {
   arrayUnion,
   serverTimestamp,
   writeBatch,
-  increment
+  increment,
+  onSnapshot
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
 
-// Initialize Firebase
+// Initialize Firebase.
 const app = initializeApp(firebaseConfig)
 
-// Initialize Cloud Firestore and get a reference to the service
+// Initialize Cloud Firestore and get a reference to the service.
 const db = getFirestore(app)
 
 export default {
-  // ------ Fetch single resource
+  // ------ Fetch single resource.
   fetchAuthUser: ({ dispatch, state }) =>
     dispatch('fetchUser', { id: state.authId }),
   fetchCategory: ({ dispatch }, { id }) =>
@@ -40,20 +41,31 @@ export default {
   fetchItem: async ({ commit }, { resource, id, emoji }) => {
     if (!id) return {}
 
-    // using upgrade Firestore modular API
-    const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
-    const docSnap = await getDoc(resourceRef)
+    return new Promise((resolve, reject) => {
+      // using upgrade Firestore modular API.
+      const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
 
-    if (!docSnap.exists()) return {}
+      const unsubscribe = onSnapshot(resourceRef,
+        (snapshot) => {
+          if (!snapshot.exists()) return {}
 
-    const item = docToResource(docSnap)
+          const item = docToResource(snapshot)
 
-    commit('setItem', { resource, item })
+          // update local store state.
+          commit('setItem', { resource, item })
 
-    return item
+          resolve(item)
+        },
+        (err) => {
+          console.error(err)
+          reject(err)
+        })
+
+      commit('appendUnsubscribe', { unsubscribe }) // for cleanup listeners when route changes.
+    })
   },
 
-  // ------ Fetch multiple resources
+  // ------ Fetch multiple resources.
   fetchAllCategories: ({ dispatch }) =>
     dispatch('fetchAll', { resource: 'categories' }),
   fetchForums: ({ dispatch }, { ids }) =>
@@ -85,7 +97,7 @@ export default {
     return all
   },
 
-  // ------ Create/Update resource
+  // ------ Create/Update resource.
   updateThread: async ({ state }, { title, text, id }) => {
     const { id: threadId, posts: threadPosts } = findById(state.threads, id)
     // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
@@ -161,7 +173,6 @@ export default {
     }
   },
   updatePost: async ({ dispatch, commit, state }, { id, text }) => {
-    console.log(id, text)
     try {
       const post = {
         text,
@@ -229,5 +240,12 @@ export default {
     }
   },
   updateUser: ({ commit }, user) =>
-    commit('setItem', { resource: 'users', item: user })
+    commit('setItem', { resource: 'users', item: user }),
+
+  // ------ Memory leaks, performance issues.
+  // unregister Firestore realtime updates listeners (onSnapshot).
+  unsubscribeAllSnapshots: async ({ commit, state }) => {
+    state.unsubscribes.forEach(unsubscribe => unsubscribe())
+    commit('clearAllSnapshots')
+  }
 }

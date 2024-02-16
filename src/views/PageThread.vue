@@ -32,7 +32,7 @@ export default {
   async created () {
     const thread = await this.fetchThread({ id: this.threadId })
     const posts = await this.fetchPosts({ ids: thread.posts })
-    // fetch the posts associated users and the thread user
+    // fetch the posts associated users and the thread user.
     const users = flatFilterValues(
       posts.map(({ userId }) => userId).concat(thread.userId)
     )

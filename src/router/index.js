@@ -7,6 +7,7 @@ import PageCategory from '@/views/PageCategory.vue'
 import PageProfile from '@/views/PageProfile.vue'
 import PageThreadCreate from '@/views/PageThreadCreate.vue'
 import PageThreadEdit from '@/views/PageThreadEdit.vue'
+import store from '@/store'
 
 const routes = [
   { name: 'Home', path: '/', component: PageHome },
@@ -67,7 +68,7 @@ const routes = [
   { name: 'NotFound', path: '/:pathMatch(.*)*', component: PageNotFound }
 ]
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior (to) {
@@ -80,3 +81,9 @@ export default createRouter({
     return scroll
   }
 })
+
+router.beforeEach(() => {
+  store.dispatch('unsubscribeAllSnapshots') // unregister Firestore realtime updates listeners when route changes.
+})
+
+export default router
