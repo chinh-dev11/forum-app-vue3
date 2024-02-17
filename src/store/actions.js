@@ -243,6 +243,32 @@ export default {
       console.error(err)
     }
   },
+  createUser: async ({ commit }, { name, username, email, avatar = null }) => {
+    try {
+      const user = {
+        name,
+        username,
+        usernameLower: username.toLowerCase(),
+        email: email.toLowerCase(),
+        avatar,
+        registeredAt: serverTimestamp()
+      }
+
+      // --- Firestore
+      const usersRef = collection(db, 'users')
+      const newUserRef = await addDoc(usersRef, user)
+
+      // --- local state
+      const newUserDoc = await getDoc(newUserRef)
+      const newUser = docToResource(newUserDoc)
+      commit('setItem', { resource: 'users', item: newUser })
+
+      return newUser
+    } catch (err) {
+      console.error(err)
+      return null
+    }
+  },
   updateUser: ({ commit }, user) =>
     commit('setItem', { resource: 'users', item: user }),
 
