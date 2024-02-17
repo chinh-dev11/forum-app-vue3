@@ -16,7 +16,7 @@ export default {
 
 <template>
   <TheNavbar />
-  <div class="container"><router-view /></div>
+  <router-view />
 </template>
 
 <style>

@@ -2,9 +2,11 @@
 import ThreadEditor from '@/components/ThreadEditor.vue'
 import { findById } from '@/helpers'
 import { mapActions } from 'vuex'
+import asyncDataStatus from '@/mixins/asyncDataStatus'
 
 export default {
   components: { ThreadEditor },
+  mixins: [asyncDataStatus],
   props: {
     forumId: {
       type: String,
@@ -13,7 +15,7 @@ export default {
   },
   computed: {
     forum () {
-      return findById(this.$store.state.forums, this.forumId) || {}
+      return findById(this.$store.state.forums, this.forumId)
     }
   },
   methods: {
@@ -31,18 +33,22 @@ export default {
       this.$router.push({ name: 'Forum', params: { forumId: this.forum.id } })
     }
   },
-  created () {
-    this.fetchForum({ id: this.forumId })
+  async created () {
+    await this.fetchForum({ id: this.forumId })
+
+    this.asyncDataStatus_fetched()
   }
 }
 </script>
 
 <template>
-  <div class="col-full push-top">
-    <h1>
-      Create new thread in <i>{{ forum.name }}</i>
-    </h1>
-    <ThreadEditor @save="save" @cancel="cancel" />
+  <div v-if="asyncDataStatus_ready" class="container">
+    <div class="col-full push-top">
+      <h1>
+        Create new thread in <i>{{ forum.name }}</i>
+      </h1>
+      <ThreadEditor @save="save" @cancel="cancel" />
+    </div>
   </div>
 </template>
 

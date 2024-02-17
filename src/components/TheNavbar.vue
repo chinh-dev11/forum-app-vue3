@@ -14,12 +14,12 @@ export default {
       <img src="../assets/svg/vueschool-logo.svg" />
     </router-link>
 
-    <div class="btn-hamburger">
+    <!-- <div class="btn-hamburger"> -->
       <!-- use .btn-humburger-active to open the menu -->
-      <div class="top bar"></div>
-      <div class="middle bar"></div>
-      <div class="bottom bar"></div>
-    </div>
+      <!-- <div class="top bar"></div> -->
+      <!-- <div class="middle bar"></div> -->
+      <!-- <div class="bottom bar"></div> -->
+    <!-- </div> -->
 
     <!-- use .navbar-open to open nav -->
     <nav class="navbar">
@@ -55,8 +55,8 @@ export default {
         </li>
       </ul>
 
-      <ul>
-        <li class="navbar-item">
+      <!-- <ul> -->
+        <!-- <li class="navbar-item">
           <router-link :to="{ name: 'Home' }">Home</router-link>
         </li>
         <li class="navbar-item">
@@ -76,15 +76,15 @@ export default {
             :to="{ name: 'Thread', params: { threadId: 'nonexistent' } }"
             >Thread</router-link
           >
-        </li>
+        </li> -->
         <!-- Show these option only on mobile-->
-        <li class="navbar-item mobile-only">
+        <!-- <li class="navbar-item mobile-only">
           <a href="#">My Profile</a>
         </li>
         <li class="navbar-item mobile-only">
           <a href="#">Logout</a>
-        </li>
-      </ul>
+        </li> -->
+      <!-- </ul> -->
     </nav>
   </header>
 </template>

@@ -20,7 +20,7 @@ export default {
           return state.threads.filter(({ userId }) => userId === user.id)
         },
         get threadsCount () {
-          return user.threads.length || 0
+          return user.threads?.length || 0
         }
       }
     }

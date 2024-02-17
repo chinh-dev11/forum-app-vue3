@@ -43,7 +43,7 @@ export default {
     return new Promise((resolve, reject) => {
       // using upgrade Firestore modular API.
       const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
-      const unsubscribe = onSnapshot(
+      const unsubscribe = onSnapshot( // Firestore realtime updates listener
         resourceRef,
         (snapshot) => {
           if (!snapshot.exists()) return {}
@@ -61,7 +61,7 @@ export default {
         }
       )
 
-      commit('appendUnsubscribe', { unsubscribe }) // to be used to remove Firestore realtime updates listeners when route changes.
+      commit('appendUnsubscribe', { unsubscribe }) // to be used to remove Firestore realtime updates listeners on route change.
     })
   },
 
@@ -94,6 +94,8 @@ export default {
     const all = docSnap.docs.map((doc) => docToResource(doc))
 
     commit('setItems', { resource, items: all })
+
+    return all
   },
 
   // ------ Create/Update resource.

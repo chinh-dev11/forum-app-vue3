@@ -3,9 +3,11 @@ import PostList from '@/components/PostList.vue'
 import PostEditor from '@/components/PostEditor.vue'
 import { mapActions } from 'vuex'
 import { flatFilterValues } from '@/helpers'
+import asyncDataStatus from '@/mixins/asyncDataStatus'
 
 export default {
   components: { PostList, PostEditor },
+  mixins: [asyncDataStatus],
   props: {
     threadId: {
       type: String,
@@ -36,39 +38,45 @@ export default {
     const users = flatFilterValues(
       posts.map(({ userId }) => userId).concat(thread.userId)
     )
-    this.fetchUsers({ ids: users })
+    await this.fetchUsers({ ids: users })
+
+    this.asyncDataStatus_fetched()
   }
 }
 </script>
 
 <template>
-  <div class="col-large push-top">
-    <h1>
-      {{ thread.title }}
-      <router-link
-        :to="{ name: 'ThreadEdit', params: { threadId: thread.id } }"
-        v-slot="{ navigate }"
-        class="btn-green btn-small"
-        ><button @click="navigate" role="link">Edit Thread</button></router-link
-      >
-    </h1>
-    <p>
-      By
-      <a href="#" class="link-unstyled">{{ thread.author?.name }}</a
-      >, <AppDate :timestamp="thread.publishedAt" />
-      <span
-        style="float: right; margin-top: 2px"
-        class="hide-mobile text-faded text-small"
-        >{{ thread.repliesCount }} repl{{
-          thread.repliesCount ? "ies" : "y"
-        }}
-        by {{ thread.contributorsCount }} contributor{{
-          thread.contributorsCount ? "s" : ""
-        }}</span
-      >
-    </p>
-    <PostList :posts="threadPosts" />
-    <PostEditor @save="savePost" />
+  <div v-if="asyncDataStatus_ready" class="container">
+    <div class="col-large push-top">
+      <h1>
+        {{ thread.title }}
+        <router-link
+          :to="{ name: 'ThreadEdit', params: { threadId: thread.id } }"
+          v-slot="{ navigate }"
+          class="btn-green btn-small"
+          ><button @click="navigate" role="link">
+            Edit Thread
+          </button></router-link
+        >
+      </h1>
+      <p>
+        By
+        <a href="#" class="link-unstyled">{{ thread.author?.name }}</a
+        >, <AppDate :timestamp="thread.publishedAt" />
+        <span
+          style="float: right; margin-top: 2px"
+          class="hide-mobile text-faded text-small"
+          >{{ thread.repliesCount }} repl{{
+            thread.repliesCount ? "ies" : "y"
+          }}
+          by {{ thread.contributorsCount }} contributor{{
+            thread.contributorsCount ? "s" : ""
+          }}</span
+        >
+      </p>
+      <PostList :posts="threadPosts" />
+      <PostEditor @save="savePost" />
+    </div>
   </div>
 </template>
 
