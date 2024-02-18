@@ -17,6 +17,7 @@ import {
   onSnapshot
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
+// import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
 
 // Initialize Firebase.
 const app = initializeApp(firebaseConfig)
@@ -243,9 +244,10 @@ export default {
       console.error(err)
     }
   },
-  createUser: async ({ commit }, { name, username, email, avatar = null }) => {
+  createUser: async ({ commit }, { id, name, username, email, avatar = null }) => {
     try {
       const user = {
+        id,
         name,
         username,
         usernameLower: username.toLowerCase(),
@@ -259,14 +261,12 @@ export default {
       const newUserRef = await addDoc(usersRef, user)
 
       // --- local state
-      const newUserDoc = await getDoc(newUserRef)
-      const newUser = docToResource(newUserDoc)
+      const newUser = (await getDoc(newUserRef)).data()
       commit('setItem', { resource: 'users', item: newUser })
 
       return newUser
-    } catch (err) {
-      console.error(err)
-      return null
+    } catch (error) {
+      return ({ error })
     }
   },
   updateUser: ({ commit }, user) =>
