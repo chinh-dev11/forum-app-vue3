@@ -1,6 +1,5 @@
 <script>
 import { mapActions } from 'vuex'
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
 
 export default {
   data () {
@@ -8,39 +7,22 @@ export default {
       form: {
         name: 'nobo duy',
         username: 'nobo',
-        email: 'nobo93@me.com',
+        email: 'nobo@me.com',
         password: 'abcd1234',
         avatar: 'https://avatars3.githubusercontent.com/u/2327556?v=4&s=460'
       }
     }
   },
   methods: {
-    ...mapActions(['createUser', 'createUserWithEmailAndPassword']),
-    async registerWithEmailAndPassword () {
-      const auth = getAuth()
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, this.form.email, this.form.password)
-        return userCredential.user
-      } catch (error) {
-        return ({ error })
-      }
-    },
+    ...mapActions(['createUserWithEmailAndPassword']),
     async register () {
-      // Firebase Authentication
-      let user = await this.registerWithEmailAndPassword()
+      const user = await this.createUserWithEmailAndPassword(this.form)
 
-      if (user.uid) {
-        this.form.id = user.uid
-        // store user in FireStore
-        user = await this.createUser(this.form)
-
-        if (user) {
-          this.$router.push({ name: 'Home' })
-        } else {
-          // manage error
-        }
+      if (!user.error) {
+        this.$router.push({ name: 'Home' })
       } else {
-        // manage error
+        console.error(user.error)
+        // TODO: manage error
       }
     }
   },
@@ -55,7 +37,6 @@ export default {
     <div class="flex-grid justify-center">
       <div class="col-2">
         <form @submit.prevent="register" class="card card-form">
-        <!-- <form @submit.prevent="registerWithEmailAndPassword" class="card card-form"> -->
           <h1 class="text-center">Register</h1>
 
           <div class="form-group">

@@ -17,7 +17,7 @@ import {
   onSnapshot
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
-// import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
 
 // Initialize Firebase.
 const app = initializeApp(firebaseConfig)
@@ -149,7 +149,7 @@ export default {
         })
         .commit()
 
-      // --- local state
+      // --- local store
       commit('appendThreadToForum', {
         parentId: forumId,
         childId: newThreadRef.id
@@ -159,7 +159,7 @@ export default {
         childId: newThreadRef.id
       })
 
-      // to store same data to local state as in Firestore (i.e. timestamp).
+      // to store same data to local store as in Firestore (i.e. timestamp).
       const threadDoc = await getDoc(newThreadRef)
       commit('setItem', {
         resource: 'threads',
@@ -191,14 +191,12 @@ export default {
         ...post
       })
 
-      // update local state
+      // update local store
       const updatedPost = await getDoc(postRef)
       commit('setItem', {
         resource: 'posts',
         item: docToResource(updatedPost)
       })
-
-      // return true
     } catch (err) {
       console.error(err)
     }
@@ -224,8 +222,8 @@ export default {
         postsCount: increment(1) // increment at every post creation
       })
 
-      // --- local state
-      const postDoc = (await getDoc(newPostRef)).data() // to store same data to local state as in Firestore (i.e. timestamp).
+      // --- local store
+      const postDoc = (await getDoc(newPostRef)).data() // to store same data to local store as in Firestore (i.e. timestamp).
       commit('setItem', {
         resource: 'posts',
         item: { ...postDoc, id: newPostRef.id }
@@ -244,6 +242,24 @@ export default {
       console.error(err)
     }
   },
+  // Firebase Authentication
+  createUserWithEmailAndPassword: async ({ dispatch }, user) => {
+    const auth = getAuth()
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password)
+      const userCredentialCreated = userCredential.user
+
+      if (!userCredentialCreated.uid) return null
+
+      user.id = userCredentialCreated.uid
+      // add user to Firestore and local store
+      const userCreated = await dispatch('createUser', user)
+
+      return userCreated
+    } catch (error) {
+      return ({ error })
+    }
+  },
   createUser: async ({ commit }, { id, name, username, email, avatar = null }) => {
     try {
       const user = {
@@ -260,7 +276,7 @@ export default {
       const usersRef = collection(db, 'users')
       const newUserRef = await addDoc(usersRef, user)
 
-      // --- local state
+      // --- local store
       const newUser = (await getDoc(newUserRef)).data()
       commit('setItem', { resource: 'users', item: newUser })
 
