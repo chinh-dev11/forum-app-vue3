@@ -14,9 +14,9 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['createUserWithEmailAndPassword']),
+    ...mapActions(['registerUserWithEmailAndPassword']),
     async register () {
-      const user = await this.createUserWithEmailAndPassword(this.form)
+      const user = await this.registerUserWithEmailAndPassword(this.form)
 
       if (!user.error) {
         this.$router.push({ name: 'Home' })

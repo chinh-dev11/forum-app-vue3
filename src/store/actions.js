@@ -8,7 +8,8 @@ import {
   getDocs,
   getDoc,
   doc,
-  addDoc,
+  addDoc, // Firestore auto-generated id
+  setDoc, // must provide an id
   updateDoc,
   arrayUnion,
   serverTimestamp,
@@ -27,8 +28,25 @@ const db = getFirestore(app)
 
 export default {
   // ------ Fetch single resource.
-  fetchAuthUser: ({ dispatch, state }) =>
-    dispatch('fetchUser', { id: state.authId }),
+  fetchAuthUser: async ({ dispatch, commit }) => {
+    try {
+      const userId = getAuth().currentUser?.uid || null // get the Firebase authentication current auth user id
+
+      commit('setAuthId', userId)
+
+      if (!userId) {
+        // no user authenticated: need to do something?
+        return null
+      }
+
+      const user = await dispatch('fetchUser', { id: userId })
+
+      return user.id
+    } catch (error) {
+      console.error(error)
+      return { error }
+    }
+  },
   fetchCategory: ({ dispatch }, { id }) =>
     dispatch('fetchItem', { resource: 'categories', id }),
   fetchForum: ({ dispatch }, { id }) =>
@@ -51,8 +69,7 @@ export default {
 
           const item = docToResource(snapshot)
 
-          // update local store state.
-          commit('setItem', { resource, item })
+          commit('setItem', { resource, item }) // update local store state.
 
           resolve(item)
         },
@@ -174,7 +191,7 @@ export default {
       console.error(err)
     }
   },
-  updatePost: async ({ dispatch, commit, state }, { id, text }) => {
+  updatePost: async ({ commit, state }, { id, text }) => {
     try {
       const post = {
         text,
@@ -243,17 +260,16 @@ export default {
     }
   },
   // Firebase Authentication
-  createUserWithEmailAndPassword: async ({ dispatch }, user) => {
+  registerUserWithEmailAndPassword: async ({ dispatch }, user) => {
     const auth = getAuth()
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password)
-      const userCredentialCreated = userCredential.user
+      const userCredentialUid = userCredential.user?.uid
 
-      if (!userCredentialCreated.uid) return null
+      if (!userCredentialUid) return null
 
-      user.id = userCredentialCreated.uid
-      // add user to Firestore and local store
-      const userCreated = await dispatch('createUser', user)
+      user.id = userCredentialUid
+      const userCreated = await dispatch('createUser', user) // add user to Firestore and local store
 
       return userCreated
     } catch (error) {
@@ -273,11 +289,15 @@ export default {
       }
 
       // --- Firestore
-      const usersRef = collection(db, 'users')
-      const newUserRef = await addDoc(usersRef, user)
+      await setDoc(doc(db, 'users', id), user) // add user to Firestore with provided id/index
 
       // --- local store
-      const newUser = (await getDoc(newUserRef)).data()
+      const newUserRef = doc(db, 'users', id)
+      const newUserSnap = await getDoc(newUserRef)
+
+      if (!newUserSnap.exists()) return {}
+
+      const newUser = newUserSnap.data()
       commit('setItem', { resource: 'users', item: newUser })
 
       return newUser

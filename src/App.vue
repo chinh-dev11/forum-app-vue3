@@ -1,6 +1,5 @@
 <script>
 import TheNavbar from '@/components/TheNavbar.vue'
-import { mapActions } from 'vuex'
 import AppSpinner from './components/AppSpinner.vue'
 import NProgress from 'nprogress'
 
@@ -13,15 +12,12 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['fetchAuthUser']),
     onPageReady () {
       NProgress.done()
       this.showPage = true
     }
   },
   created () {
-    this.fetchAuthUser()
-
     NProgress.configure({
       speed: 200,
       showSpinner: false
