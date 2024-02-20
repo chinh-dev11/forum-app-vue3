@@ -18,7 +18,7 @@ import {
   onSnapshot
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 
 // Initialize Firebase.
 const app = initializeApp(firebaseConfig)
@@ -257,6 +257,30 @@ export default {
       dispatch('fetchItem', { resource: 'users', id: userRef.id }) // fetch the post's user to get the new postsCount.
     } catch (err) {
       console.error(err)
+    }
+  },
+  // Firebase Authentication
+  signInUser: async ({ dispatch }, { email, password }) => {
+    try {
+      const auth = getAuth()
+      const { user } = await signInWithEmailAndPassword(auth, email, password)
+
+      await dispatch('fetchAuthUser')
+
+      return user.auth
+    } catch (error) {
+      return { error }
+    }
+  },
+  // Firebase Authentication
+  signOutUser: async ({ commit }) => {
+    try {
+      const auth = getAuth()
+      await signOut(auth)
+
+      commit('setAuthId', null)
+    } catch (error) {
+      console.error(error)
     }
   },
   // Firebase Authentication

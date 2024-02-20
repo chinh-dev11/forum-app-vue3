@@ -5,11 +5,11 @@ export default {
   data () {
     return {
       form: {
-        name: 'nobo duy',
-        username: 'nobo',
-        email: 'nobo@me.com',
-        password: 'abcd1234',
-        avatar: 'https://avatars3.githubusercontent.com/u/2327556?v=4&s=460'
+        name: '',
+        username: '',
+        email: '',
+        password: '',
+        avatar: ''
       }
     }
   },

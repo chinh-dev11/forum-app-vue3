@@ -32,7 +32,7 @@ export default {
 </script>
 
 <template>
-  <TheNavbar />
+  <TheNavbar @ready="onPageReady" />
   <router-view v-show="showPage" @ready="onPageReady" />
   <AppSpinner v-show="!showPage" />
 </template>
