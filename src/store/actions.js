@@ -18,7 +18,7 @@ import {
   onSnapshot
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 
 // Initialize Firebase.
 const app = initializeApp(firebaseConfig)
@@ -41,9 +41,8 @@ export default {
 
       const user = await dispatch('fetchUser', { id: userId })
 
-      return user.id
+      return { id: user.id }
     } catch (error) {
-      console.error(error)
       return { error }
     }
   },
@@ -74,7 +73,6 @@ export default {
           resolve(item)
         },
         (err) => {
-          console.error(err)
           reject(err)
         }
       )
@@ -137,8 +135,8 @@ export default {
         .commit()
 
       return threadId
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      return { error }
     }
   },
   createThread: async (
@@ -187,8 +185,8 @@ export default {
       await dispatch('createPost', { post }) // add the initial post of the new thread to posts.
 
       return findById(state.threads, newThreadRef.id)
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      return { error }
     }
   },
   updatePost: async ({ commit, state }, { id, text }) => {
@@ -214,8 +212,8 @@ export default {
         resource: 'posts',
         item: docToResource(updatedPost)
       })
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      return { error }
     }
   },
   createPost: async ({ dispatch, commit, state }, { post }) => {
@@ -255,19 +253,38 @@ export default {
       })
 
       dispatch('fetchItem', { resource: 'users', id: userRef.id }) // fetch the post's user to get the new postsCount.
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      return { error }
+    }
+  },
+  // Firebase Authentication - with Google provider
+  signInUserWithGoogle: async ({ dispatch }) => {
+    try {
+      const provider = new GoogleAuthProvider()
+      const auth = getAuth()
+      const { user } = await signInWithPopup(auth, provider)
+
+      const newUser = {
+        id: user.uid,
+        name: user.displayName,
+        username: user.email,
+        email: user.email,
+        avatar: user.photoURL
+      }
+      await dispatch('createUser', newUser)
+
+      return await dispatch('fetchAuthUser')
+    } catch (error) {
+      return { error }
     }
   },
   // Firebase Authentication
   signInUser: async ({ dispatch }, { email, password }) => {
     try {
       const auth = getAuth()
-      const { user } = await signInWithEmailAndPassword(auth, email, password)
+      await signInWithEmailAndPassword(auth, email, password)
 
-      await dispatch('fetchAuthUser')
-
-      return user.auth
+      return await dispatch('fetchAuthUser')
     } catch (error) {
       return { error }
     }

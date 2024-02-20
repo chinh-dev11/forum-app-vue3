@@ -14,23 +14,41 @@ export default {
     this.$emit('ready')
   },
   methods: {
-    ...mapActions(['signInUser']),
+    ...mapActions(['signInUser', 'signInUserWithGoogle']),
+    async signInWithGoogle () {
+      const user = await this.signInUserWithGoogle()
+
+      if (user?.id) {
+        this.$router.push({ name: 'Home' })
+        return
+      }
+
+      switch (user.error.code) {
+        case 'auth/popup-closed-by-user':
+          break
+        case '...':
+          break
+        default:
+      }
+    },
     async signIn () {
       const user = await this.signInUser(this.form)
 
-      if (!user?.error) this.$router.push({ name: 'Home' })
-      else {
-        switch (user.error.code) {
+      if (user.id) {
+        this.$router.push({ name: 'Home' })
+        return
+      }
+
+      switch (user.error.code) {
         // auth/invalid-credential: unknown email, wrong password.
-          case 'auth/invalid-credential':
+        case 'auth/invalid-credential':
           // TODO: need to differentiate between wrong password and email not registered.
           // this.$router.push({ name: 'Register' })
-            break
-          case 'auth/missing-password':
-            // TODO: highlight the missing field.
-            break
-          default:
-        }
+          break
+        case 'auth/missing-password':
+          // TODO: highlight the missing field.
+          break
+        default:
       }
     }
   }
@@ -79,7 +97,7 @@ export default {
         </form>
 
         <div class="push-top text-center">
-          <button class="btn-red btn-xsmall">
+          <button @click="signInWithGoogle" class="btn-red btn-xsmall">
             <i class="fa fa-google fa-btn"></i>Sign in with Google
           </button>
         </div>

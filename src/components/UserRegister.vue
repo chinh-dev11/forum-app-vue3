@@ -14,7 +14,23 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['registerUserWithEmailAndPassword']),
+    ...mapActions(['registerUserWithEmailAndPassword', 'signInUserWithGoogle']),
+    async signUpWithGoogle () {
+      const user = await this.signInUserWithGoogle()
+
+      if (user?.id) {
+        this.$router.push({ name: 'Home' })
+        return
+      }
+
+      switch (user.error.code) {
+        case 'auth/popup-closed-by-user':
+          break
+        case '...':
+          break
+        default:
+      }
+    },
     async register () {
       const user = await this.registerUserWithEmailAndPassword(this.form)
 
@@ -96,7 +112,7 @@ export default {
           </div>
         </form>
         <div class="text-center push-top">
-          <button class="btn-red btn-xsmall">
+          <button @click="signUpWithGoogle" class="btn-red btn-xsmall">
             <i class="fa fa-google fa-btn"></i>Sign up with Google
           </button>
         </div>

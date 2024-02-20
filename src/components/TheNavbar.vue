@@ -14,8 +14,8 @@ export default {
     ...mapActions(['signOutUser']),
     async signOut () {
       await this.signOutUser()
-      this.userDropdownOpen = false
       this.$emit('ready')
+      this.userDropdownOpen = false
     }
   }
 }
