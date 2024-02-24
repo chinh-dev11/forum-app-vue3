@@ -46,7 +46,7 @@ export default {
     const thread = await this.fetchThread({ id: this.threadId })
     await this.fetchPost({ id: thread.posts[0] })
 
-    this.asyncDataStatus_fetched()
+    this.asyncDataStatus_fetched() // show content once data is fetched.
   }
 }
 </script>

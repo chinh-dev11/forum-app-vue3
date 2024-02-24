@@ -30,7 +30,7 @@ export default {
     const category = await this.fetchCategory({ id: this.catId })
     await this.fetchForums({ ids: category.forums })
 
-    this.asyncDataStatus_fetched()
+    this.asyncDataStatus_fetched() // show content once data is fetched.
   }
 }
 </script>

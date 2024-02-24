@@ -30,7 +30,7 @@ export default {
     const userIds = [...new Set(threads.map(({ userId }) => userId))]
     await this.fetchUsers({ ids: userIds })
 
-    this.asyncDataStatus_fetched()
+    this.asyncDataStatus_fetched() // show content once data is fetched.
   }
 }
 </script>

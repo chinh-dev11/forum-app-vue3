@@ -18,7 +18,14 @@ import {
   onSnapshot
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup
+} from 'firebase/auth'
 
 // Initialize Firebase.
 const app = initializeApp(firebaseConfig)
@@ -39,7 +46,8 @@ export default {
         return null
       }
 
-      const user = await dispatch('fetchUser', { id: userId })
+      const unsubscribeHandler = (unsubscribe) => commit('setAuthUserUnsubscribe', unsubscribe)
+      const user = await dispatch('fetchUser', { id: userId, handleUnsubscribe: unsubscribeHandler })
 
       return { id: user.id }
     } catch (error) {
@@ -52,16 +60,17 @@ export default {
     dispatch('fetchItem', { resource: 'forums', id }),
   fetchThread: ({ dispatch }, { id }) =>
     dispatch('fetchItem', { resource: 'threads', id }),
-  fetchUser: ({ dispatch }, { id }) =>
-    dispatch('fetchItem', { resource: 'users', id }),
+  fetchUser: ({ dispatch }, { id, handleUnsubscribe }) =>
+    dispatch('fetchItem', { resource: 'users', id, handleUnsubscribe }),
   fetchPost: ({ dispatch }, { id, emoji }) =>
     dispatch('fetchItem', { resource: 'posts', id, emoji }),
   // fetch the resource and subscribe for realtime updates
-  fetchItem: ({ commit }, { resource, id, emoji }) => {
+  fetchItem: ({ commit }, { resource, id, handleUnsubscribe = null }) => {
     return new Promise((resolve, reject) => {
       // using upgrade Firestore modular API.
       const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
-      const unsubscribe = onSnapshot( // Firestore realtime updates listener
+      // Firestore realtime updates listener
+      const unsubscribe = onSnapshot(
         resourceRef,
         (snapshot) => {
           if (!snapshot.exists()) return {}
@@ -77,7 +86,10 @@ export default {
         }
       )
 
-      commit('appendUnsubscribe', { unsubscribe }) // to be used to remove Firestore realtime updates listeners on route change.
+      // register Firestore realtime updates subscriptions to the store.
+      // to be used to unsubscribe listeners on route change.
+      if (handleUnsubscribe) handleUnsubscribe(unsubscribe) // subscription of authenticated user.
+      else commit('appendUnsubscribe', { unsubscribe }) // all other subscriptions.
     })
   },
 
@@ -251,8 +263,6 @@ export default {
         childId: postDoc.userId,
         parentId: postDoc.threadId
       })
-
-      dispatch('fetchItem', { resource: 'users', id: userRef.id }) // fetch the post's user to get the new postsCount.
     } catch (error) {
       return { error }
     }
@@ -269,11 +279,11 @@ export default {
         name: user.displayName,
         username: user.email,
         email: user.email,
-        avatar: user.photoURL
+        avatar: user.photoURL,
+        registeredAt: user.metadata.createdAt
       }
-      await dispatch('createUser', newUser)
 
-      return await dispatch('fetchAuthUser')
+      return await dispatch('createUser', newUser)
     } catch (error) {
       return { error }
     }
@@ -282,9 +292,7 @@ export default {
   signInUser: async ({ dispatch }, { email, password }) => {
     try {
       const auth = getAuth()
-      await signInWithEmailAndPassword(auth, email, password)
-
-      return await dispatch('fetchAuthUser')
+      return await signInWithEmailAndPassword(auth, email, password)
     } catch (error) {
       return { error }
     }
@@ -304,20 +312,26 @@ export default {
   registerUserWithEmailAndPassword: async ({ dispatch }, user) => {
     const auth = getAuth()
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password)
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        user.email,
+        user.password
+      )
       const userCredentialUid = userCredential.user?.uid
 
       if (!userCredentialUid) return null
 
       user.id = userCredentialUid
-      const userCreated = await dispatch('createUser', user) // add user to Firestore and local store
 
-      return userCreated
+      return await dispatch('createUser', user) // add user to Firestore and local store
     } catch (error) {
-      return ({ error })
+      return { error }
     }
   },
-  createUser: async ({ commit }, { id, name, username, email, avatar = null }) => {
+  createUser: async (
+    { commit },
+    { id, name, username, email, avatar = null, registeredAt = serverTimestamp() }
+  ) => {
     try {
       const user = {
         id,
@@ -326,7 +340,7 @@ export default {
         usernameLower: username.toLowerCase(),
         email: email.toLowerCase(),
         avatar,
-        registeredAt: serverTimestamp()
+        registeredAt
       }
 
       // --- Firestore
@@ -343,14 +357,22 @@ export default {
 
       return newUser
     } catch (error) {
-      return ({ error })
+      return { error }
     }
   },
   updateUser: ({ commit }, user) =>
     commit('setItem', { resource: 'users', item: user }),
 
   // ------ Memory leaks, performance issues.
-  // unregister Firestore realtime updates listeners (onSnapshot).
+  // unsubscribe Firestore realtime updates listeners (onSnapshot).
+  // authenticate user Firebase realtime updates subscription
+  unsubscribeAuthUserSnapshot: async ({ commit, state }) => {
+    if (state.authUserUnsubscribe) {
+      state.authUserUnsubscribe()
+      commit('setAuthUserUnsubscribe', null)
+    }
+  },
+  // all other subscriptions: forums, threads, other users,...
   unsubscribeAllSnapshots: async ({ commit, state }) => {
     state.unsubscribes.forEach((unsubscribe) => unsubscribe())
     commit('clearAllSnapshots')

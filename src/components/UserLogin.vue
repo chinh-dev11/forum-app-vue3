@@ -32,14 +32,14 @@ export default {
       }
     },
     async signIn () {
-      const user = await this.signInUser(this.form)
+      const res = await this.signInUser(this.form)
 
-      if (user.id) {
+      if (res.user?.uid) {
         this.$router.push({ name: 'Home' })
         return
       }
 
-      switch (user.error.code) {
+      switch (res.error.code) {
         // auth/invalid-credential: unknown email, wrong password.
         case 'auth/invalid-credential':
           // TODO: need to differentiate between wrong password and email not registered.

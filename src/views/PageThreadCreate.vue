@@ -36,7 +36,7 @@ export default {
   async created () {
     await this.fetchForum({ id: this.forumId })
 
-    this.asyncDataStatus_fetched()
+    this.asyncDataStatus_fetched() // show content once data is fetched.
   }
 }
 </script>

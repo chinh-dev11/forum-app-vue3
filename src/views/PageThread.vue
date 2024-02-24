@@ -22,6 +22,9 @@ export default {
       return this.$store.state.posts.filter(
         ({ threadId }) => threadId === this.thread.id
       )
+    },
+    isUserAuthenticated () {
+      return this.$store.getters.authUser.id
     }
   },
   methods: {
@@ -40,7 +43,7 @@ export default {
     )
     await this.fetchUsers({ ids: users })
 
-    this.asyncDataStatus_fetched()
+    this.asyncDataStatus_fetched() // show content once data is fetched.
   }
 }
 </script>
@@ -75,7 +78,7 @@ export default {
         >
       </p>
       <PostList :posts="threadPosts" />
-      <PostEditor @save="savePost" />
+      <PostEditor v-if="isUserAuthenticated" @save="savePost" />
     </div>
   </div>
 </template>

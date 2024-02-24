@@ -20,7 +20,7 @@ export default {
     const forumIds = flatFilterValues(categories.map(({ forums }) => forums))
     await this.fetchForums({ ids: forumIds })
 
-    this.asyncDataStatus_fetched()
+    this.asyncDataStatus_fetched() // show content once data is fetched.
   }
 }
 </script>
