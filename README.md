@@ -1,6 +1,12 @@
 # forum-app-vue3
-- Hosting at [chinh.ca](https://forum.chinh.ca/).
-- Deploy on [Vercel](https://vercel.com).
+Hosting at [chinh.ca](https://forum.chinh.ca/).
+
+Deployed on [Vercel](https://vercel.com).
+
+## Project detail
+- Scaffolded with `create-vue` (based on [Vite](https://vitejs.dev/))
+- Database (NoSQL): [Firestore](https://firebase.google.com/docs/firestore) (Firebase)
+- Authentication: [Firebase Authentication](https://firebase.google.com/docs/auth)
 
 ## Project setup
 ```

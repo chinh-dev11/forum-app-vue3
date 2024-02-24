@@ -1,9 +1,22 @@
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
+  data () {
+    return {
+      userDropdownOpen: false
+    }
+  },
   computed: {
     ...mapGetters(['authUser'])
+  },
+  methods: {
+    ...mapActions(['signOutUser']),
+    async signOut () {
+      await this.signOutUser()
+      this.$emit('ready')
+      this.userDropdownOpen = false
+    }
   }
 }
 </script>
@@ -14,49 +27,55 @@ export default {
       <img src="../assets/svg/vueschool-logo.svg" />
     </router-link>
 
-    <div class="btn-hamburger">
-      <!-- use .btn-humburger-active to open the menu -->
-      <div class="top bar"></div>
-      <div class="middle bar"></div>
-      <div class="bottom bar"></div>
-    </div>
+    <!-- <div class="btn-hamburger"> -->
+    <!-- use .btn-humburger-active to open the menu -->
+    <!-- <div class="top bar"></div> -->
+    <!-- <div class="middle bar"></div> -->
+    <!-- <div class="bottom bar"></div> -->
+    <!-- </div> -->
 
     <!-- use .navbar-open to open nav -->
-    <nav class="navbar">
+    <nav :class="{ 'navbar-open': userDropdownOpen }" class="navbar">
       <ul>
-        <li v-if="authUser" class="navbar-user">
-          <router-link :to="{ name: 'Profile' }">
-            <img
+        <li v-if="authUser.id" class="navbar-user">
+          <a @click.prevent="userDropdownOpen = !userDropdownOpen" href="#"
+            ><img
               class="avatar-small"
               :src="authUser.avatar"
-              :alt="`${authUser.name} profile picture`"
-            />
+              :alt="`${authUser.name} profile picture`" />
             <span>
               {{ authUser.name }}
               <img
                 class="icon-profile"
                 src="../assets/svg/arrow-profile.svg"
                 alt=""
-              />
-            </span>
-          </router-link>
+              /> </span
+          ></a>
 
           <!-- dropdown menu -->
           <!-- add class "active-drop" to show the dropdown -->
-          <div id="user-dropdown">
+          <div id="user-dropdown" :class="{ 'active-drop': userDropdownOpen }">
             <div class="triangle-drop"></div>
             <ul class="dropdown-menu">
               <li class="dropdown-menu-item">
-                <a href="#">View profile</a>
+                <router-link :to="{ name: 'Profile' }"
+                  >View profile</router-link
+                >
               </li>
-              <li class="dropdown-menu-item"><a href="#">Log out</a></li>
+              <li class="dropdown-menu-item">
+                <a @click.prevent="signOut" href="#">Log out</a>
+              </li>
             </ul>
           </div>
         </li>
+        <li v-else>
+          <router-link :to="{ name: 'Login' }" class="mr-md">Login</router-link>
+          <router-link :to="{ name: 'Register' }">Register</router-link>
+        </li>
       </ul>
 
-      <ul>
-        <li class="navbar-item">
+      <!-- <ul> -->
+      <!-- <li class="navbar-item">
           <router-link :to="{ name: 'Home' }">Home</router-link>
         </li>
         <li class="navbar-item">
@@ -76,17 +95,21 @@ export default {
             :to="{ name: 'Thread', params: { threadId: 'nonexistent' } }"
             >Thread</router-link
           >
-        </li>
-        <!-- Show these option only on mobile-->
-        <li class="navbar-item mobile-only">
+        </li> -->
+      <!-- Show these option only on mobile-->
+      <!-- <li class="navbar-item mobile-only">
           <a href="#">My Profile</a>
         </li>
         <li class="navbar-item mobile-only">
           <a href="#">Logout</a>
-        </li>
-      </ul>
+        </li> -->
+      <!-- </ul> -->
     </nav>
   </header>
 </template>
 
-<style scoped></style>
+<style scoped>
+.mr-md {
+  margin-right: 10px;
+}
+</style>

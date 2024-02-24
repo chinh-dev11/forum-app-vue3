@@ -7,10 +7,21 @@ import PageCategory from '@/views/PageCategory.vue'
 import PageProfile from '@/views/PageProfile.vue'
 import PageThreadCreate from '@/views/PageThreadCreate.vue'
 import PageThreadEdit from '@/views/PageThreadEdit.vue'
+import UserRegister from '@/components/UserRegister.vue'
+import UserLogin from '@/components/UserLogin.vue'
 import store from '@/store'
 
 const routes = [
-  { name: 'Home', path: '/', component: PageHome },
+  {
+    name: 'Login',
+    path: '/login',
+    component: UserLogin
+  },
+  {
+    name: 'Register',
+    path: '/register',
+    component: UserRegister
+  },
   {
     name: 'ProfileEdit',
     path: '/me/edit',
@@ -65,6 +76,7 @@ const routes = [
     component: PageThreadEdit,
     props: true
   },
+  { name: 'Home', path: '/', component: PageHome },
   { name: 'NotFound', path: '/:pathMatch(.*)*', component: PageNotFound }
 ]
 

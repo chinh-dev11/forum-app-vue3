@@ -1,7 +1,5 @@
 <script>
 import ForumList from '@/components/ForumList.vue'
-import { flatFilterValues } from '@/helpers'
-import { mapActions } from 'vuex'
 
 export default {
   components: { ForumList },
@@ -12,17 +10,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['fetchForums']),
     getForumsForCategory (category) {
       return this.$store.state.forums.filter(
         ({ categoryId }) => categoryId === category.id
       )
     }
-  },
-  async created () {
-    const forumIds = flatFilterValues(this.categories.map(({ forums }) => forums))
-    // fetch forums of categories
-    await this.fetchForums({ ids: forumIds })
   }
 }
 </script>

@@ -8,7 +8,8 @@ import {
   getDocs,
   getDoc,
   doc,
-  addDoc,
+  addDoc, // Firestore auto-generated id
+  setDoc, // must provide an id
   updateDoc,
   arrayUnion,
   serverTimestamp,
@@ -17,6 +18,14 @@ import {
   onSnapshot
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup
+} from 'firebase/auth'
 
 // Initialize Firebase.
 const app = initializeApp(firebaseConfig)
@@ -26,23 +35,41 @@ const db = getFirestore(app)
 
 export default {
   // ------ Fetch single resource.
-  fetchAuthUser: ({ dispatch, state }) =>
-    dispatch('fetchUser', { id: state.authId }),
+  fetchAuthUser: async ({ dispatch, commit }) => {
+    try {
+      const userId = getAuth().currentUser?.uid || null // get the Firebase authentication current auth user id
+
+      commit('setAuthId', userId)
+
+      if (!userId) {
+        // no user authenticated: need to do something?
+        return null
+      }
+
+      const unsubscribeHandler = (unsubscribe) => commit('setAuthUserUnsubscribe', unsubscribe)
+      const user = await dispatch('fetchUser', { id: userId, handleUnsubscribe: unsubscribeHandler })
+
+      return { id: user.id }
+    } catch (error) {
+      return { error }
+    }
+  },
   fetchCategory: ({ dispatch }, { id }) =>
     dispatch('fetchItem', { resource: 'categories', id }),
   fetchForum: ({ dispatch }, { id }) =>
     dispatch('fetchItem', { resource: 'forums', id }),
   fetchThread: ({ dispatch }, { id }) =>
     dispatch('fetchItem', { resource: 'threads', id }),
-  fetchUser: ({ dispatch }, { id }) =>
-    dispatch('fetchItem', { resource: 'users', id }),
+  fetchUser: ({ dispatch }, { id, handleUnsubscribe }) =>
+    dispatch('fetchItem', { resource: 'users', id, handleUnsubscribe }),
   fetchPost: ({ dispatch }, { id, emoji }) =>
     dispatch('fetchItem', { resource: 'posts', id, emoji }),
   // fetch the resource and subscribe for realtime updates
-  fetchItem: ({ commit }, { resource, id, emoji }) => {
+  fetchItem: ({ commit }, { resource, id, handleUnsubscribe = null }) => {
     return new Promise((resolve, reject) => {
       // using upgrade Firestore modular API.
       const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
+      // Firestore realtime updates listener
       const unsubscribe = onSnapshot(
         resourceRef,
         (snapshot) => {
@@ -50,18 +77,19 @@ export default {
 
           const item = docToResource(snapshot)
 
-          // update local store state.
-          commit('setItem', { resource, item })
+          commit('setItem', { resource, item }) // update local store state.
 
           resolve(item)
         },
         (err) => {
-          console.error(err)
           reject(err)
         }
       )
 
-      commit('appendUnsubscribe', { unsubscribe }) // to be used to remove Firestore realtime updates listeners when route changes.
+      // register Firestore realtime updates subscriptions to the store.
+      // to be used to unsubscribe listeners on route change.
+      if (handleUnsubscribe) handleUnsubscribe(unsubscribe) // subscription of authenticated user.
+      else commit('appendUnsubscribe', { unsubscribe }) // all other subscriptions.
     })
   },
 
@@ -94,6 +122,8 @@ export default {
     const all = docSnap.docs.map((doc) => docToResource(doc))
 
     commit('setItems', { resource, items: all })
+
+    return all
   },
 
   // ------ Create/Update resource.
@@ -117,8 +147,8 @@ export default {
         .commit()
 
       return threadId
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      return { error }
     }
   },
   createThread: async (
@@ -146,7 +176,7 @@ export default {
         })
         .commit()
 
-      // --- local state
+      // --- local store
       commit('appendThreadToForum', {
         parentId: forumId,
         childId: newThreadRef.id
@@ -156,7 +186,7 @@ export default {
         childId: newThreadRef.id
       })
 
-      // to store same data to local state as in Firestore (i.e. timestamp).
+      // to store same data to local store as in Firestore (i.e. timestamp).
       const threadDoc = await getDoc(newThreadRef)
       commit('setItem', {
         resource: 'threads',
@@ -167,11 +197,11 @@ export default {
       await dispatch('createPost', { post }) // add the initial post of the new thread to posts.
 
       return findById(state.threads, newThreadRef.id)
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      return { error }
     }
   },
-  updatePost: async ({ dispatch, commit, state }, { id, text }) => {
+  updatePost: async ({ commit, state }, { id, text }) => {
     try {
       const post = {
         text,
@@ -188,16 +218,14 @@ export default {
         ...post
       })
 
-      // update local state
+      // update local store
       const updatedPost = await getDoc(postRef)
       commit('setItem', {
         resource: 'posts',
         item: docToResource(updatedPost)
       })
-
-      // return true
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      return { error }
     }
   },
   createPost: async ({ dispatch, commit, state }, { post }) => {
@@ -221,8 +249,8 @@ export default {
         postsCount: increment(1) // increment at every post creation
       })
 
-      // --- local state
-      const postDoc = (await getDoc(newPostRef)).data() // to store same data to local state as in Firestore (i.e. timestamp).
+      // --- local store
+      const postDoc = (await getDoc(newPostRef)).data() // to store same data to local store as in Firestore (i.e. timestamp).
       commit('setItem', {
         resource: 'posts',
         item: { ...postDoc, id: newPostRef.id }
@@ -235,17 +263,116 @@ export default {
         childId: postDoc.userId,
         parentId: postDoc.threadId
       })
+    } catch (error) {
+      return { error }
+    }
+  },
+  // Firebase Authentication - with Google provider
+  signInUserWithGoogle: async ({ dispatch }) => {
+    try {
+      const provider = new GoogleAuthProvider()
+      const auth = getAuth()
+      const { user } = await signInWithPopup(auth, provider)
 
-      dispatch('fetchItem', { resource: 'users', id: userRef.id }) // fetch the post's user to get the new postsCount.
-    } catch (err) {
-      console.error(err)
+      const newUser = {
+        id: user.uid,
+        name: user.displayName,
+        username: user.email,
+        email: user.email,
+        avatar: user.photoURL,
+        registeredAt: user.metadata.createdAt
+      }
+
+      return await dispatch('createUser', newUser)
+    } catch (error) {
+      return { error }
+    }
+  },
+  // Firebase Authentication
+  signInUser: async ({ dispatch }, { email, password }) => {
+    try {
+      const auth = getAuth()
+      return await signInWithEmailAndPassword(auth, email, password)
+    } catch (error) {
+      return { error }
+    }
+  },
+  // Firebase Authentication
+  signOutUser: async ({ commit }) => {
+    try {
+      const auth = getAuth()
+      await signOut(auth)
+
+      commit('setAuthId', null)
+    } catch (error) {
+      console.error(error)
+    }
+  },
+  // Firebase Authentication
+  registerUserWithEmailAndPassword: async ({ dispatch }, user) => {
+    const auth = getAuth()
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        user.email,
+        user.password
+      )
+      const userCredentialUid = userCredential.user?.uid
+
+      if (!userCredentialUid) return null
+
+      user.id = userCredentialUid
+
+      return await dispatch('createUser', user) // add user to Firestore and local store
+    } catch (error) {
+      return { error }
+    }
+  },
+  createUser: async (
+    { commit },
+    { id, name, username, email, avatar = null, registeredAt = serverTimestamp() }
+  ) => {
+    try {
+      const user = {
+        id,
+        name,
+        username,
+        usernameLower: username.toLowerCase(),
+        email: email.toLowerCase(),
+        avatar,
+        registeredAt
+      }
+
+      // --- Firestore
+      await setDoc(doc(db, 'users', id), user) // add user to Firestore with provided id/index
+
+      // --- local store
+      const newUserRef = doc(db, 'users', id)
+      const newUserSnap = await getDoc(newUserRef)
+
+      if (!newUserSnap.exists()) return {}
+
+      const newUser = newUserSnap.data()
+      commit('setItem', { resource: 'users', item: newUser })
+
+      return newUser
+    } catch (error) {
+      return { error }
     }
   },
   updateUser: ({ commit }, user) =>
     commit('setItem', { resource: 'users', item: user }),
 
   // ------ Memory leaks, performance issues.
-  // unregister Firestore realtime updates listeners (onSnapshot).
+  // unsubscribe Firestore realtime updates listeners (onSnapshot).
+  // authenticate user Firebase realtime updates subscription
+  unsubscribeAuthUserSnapshot: async ({ commit, state }) => {
+    if (state.authUserUnsubscribe) {
+      state.authUserUnsubscribe()
+      commit('setAuthUserUnsubscribe', null)
+    }
+  },
+  // all other subscriptions: forums, threads, other users,...
   unsubscribeAllSnapshots: async ({ commit, state }) => {
     state.unsubscribes.forEach((unsubscribe) => unsubscribe())
     commit('clearAllSnapshots')

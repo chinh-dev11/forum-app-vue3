@@ -1,6 +1,8 @@
 import { upSert, findById } from '@/helpers'
 
 export default {
+  setAuthId: (state, id) => { state.authId = id },
+  setAuthUserUnsubscribe: (state, unsubscribe) => { state.authUserUnsubscribe = unsubscribe },
   setItem: (state, { resource, item }) => upSert(state[resource], item),
   setItems: (state, { resource, items }) => items.forEach(item => { upSert(state[resource], item) }),
   appendUnsubscribe: (state, { unsubscribe }) => { state.unsubscribes.push(unsubscribe) },
