@@ -18,6 +18,14 @@ const routes = [
     component: UserLogin
   },
   {
+    name: 'Logout',
+    path: '/logout',
+    async beforeEnter (to, from) {
+      await store.dispatch('signOutUser')
+      return { name: 'Home' }
+    }
+  },
+  {
     name: 'Register',
     path: '/register',
     component: UserRegister
@@ -32,7 +40,13 @@ const routes = [
     name: 'Profile',
     path: '/me',
     component: PageProfile,
-    meta: { toTop: true, smothScroll: true } // scroll top smoothly. e.g. in case when editing profile.
+    meta: { toTop: true, smothScroll: true }, // scroll top smoothly. e.g. in case when editing profile.
+    beforeEnter (to, from) {
+      // this.$store is not avail since component has not yet loaded. Hence import the store instead.
+      if (!store.state.authId) return { name: 'Home' }
+    },
+    beforeUpdate (to, from) {},
+    beforeLeave (to, from) {}
   },
   {
     name: 'Category',
