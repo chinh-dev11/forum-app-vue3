@@ -24,7 +24,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  onAuthStateChanged
 } from 'firebase/auth'
 
 // Initialize Firebase.
@@ -33,11 +34,27 @@ const app = initializeApp(firebaseConfig)
 // Initialize Cloud Firestore and get a reference to the service.
 const db = getFirestore(app)
 
+const auth = getAuth()
+
 export default {
+  initAuthentication: ({ dispatch, commit, state }) => {
+    if (state.authObserverUnsubscribe) state.authObserverUnsubscribe() // unsubscribe auth observer before setting new one, hence preventing to have multiple auth observers since auth observer is subscribed on every route change.
+
+    return new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user) await dispatch('fetchAuthUser')
+        else dispatch('unsubscribeAuthUserSnapshot') // unsubscribe authenticated user Firebase realtime updates listener when sign out.
+
+        resolve(user)
+      })
+
+      commit('setAuthObserverUnsubscribe', unsubscribe) // subscribe new auth observer.
+    })
+  },
   // ------ Fetch single resource.
   fetchAuthUser: async ({ dispatch, commit }) => {
     try {
-      const userId = getAuth().currentUser?.uid || null // get the Firebase authentication current auth user id
+      const userId = auth.currentUser?.uid || null // get the Firebase authentication current auth user id
       commit('setAuthId', userId)
 
       if (!userId) {
@@ -277,7 +294,6 @@ export default {
   signInUserWithGoogle: async ({ dispatch }) => {
     try {
       const provider = new GoogleAuthProvider()
-      const auth = getAuth()
       const { user } = await signInWithPopup(auth, provider)
 
       const newUser = {
@@ -297,7 +313,6 @@ export default {
   // Firebase Authentication
   signInUser: async ({ dispatch }, { email, password }) => {
     try {
-      const auth = getAuth()
       return await signInWithEmailAndPassword(auth, email, password)
     } catch (error) {
       return { error }
@@ -306,7 +321,6 @@ export default {
   // Firebase Authentication
   signOutUser: async ({ commit }) => {
     try {
-      const auth = getAuth()
       await signOut(auth)
 
       commit('setAuthId', null)
@@ -316,7 +330,6 @@ export default {
   },
   // Firebase Authentication
   registerUserWithEmailAndPassword: async ({ dispatch }, user) => {
-    const auth = getAuth()
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,

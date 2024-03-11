@@ -105,8 +105,10 @@ const router = createRouter({
   }
 })
 
-router.beforeEach((to, from) => {
+router.beforeEach(async (to, from) => {
   store.dispatch('unsubscribeAllSnapshots') // unregister Firestore realtime updates listeners when route changes.
+
+  await store.dispatch('initAuthentication') // ensure authId is set before checking its value.
 
   if (to.meta.requiresAuth && !store.state.authId) return { name: 'Home' }
 })
