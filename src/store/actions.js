@@ -38,7 +38,6 @@ export default {
   fetchAuthUser: async ({ dispatch, commit }) => {
     try {
       const userId = getAuth().currentUser?.uid || null // get the Firebase authentication current auth user id
-
       commit('setAuthId', userId)
 
       if (!userId) {
@@ -46,8 +45,12 @@ export default {
         return null
       }
 
-      const unsubscribeHandler = (unsubscribe) => commit('setAuthUserUnsubscribe', unsubscribe)
-      const user = await dispatch('fetchUser', { id: userId, handleUnsubscribe: unsubscribeHandler })
+      const handleUnsubscribe = (unsubscribe) =>
+        commit('setAuthUserUnsubscribe', unsubscribe)
+      const user = await dispatch('fetchUser', {
+        id: userId,
+        handleUnsubscribe
+      })
 
       return { id: user.id }
     } catch (error) {
@@ -88,8 +91,11 @@ export default {
 
       // register Firestore realtime updates subscriptions to the store.
       // to be used to unsubscribe listeners on route change.
-      if (handleUnsubscribe) handleUnsubscribe(unsubscribe) // subscription of authenticated user.
-      else commit('appendUnsubscribe', { unsubscribe }) // all other subscriptions.
+      if (handleUnsubscribe) {
+        handleUnsubscribe(unsubscribe) // subscription of authenticated user.
+      } else {
+        commit('appendUnsubscribe', { unsubscribe }) // all other subscriptions.
+      }
     })
   },
 
@@ -146,7 +152,7 @@ export default {
         })
         .commit()
 
-      return threadId
+      return threadRef
     } catch (error) {
       return { error }
     }
@@ -155,11 +161,11 @@ export default {
     { commit, state, dispatch },
     { forumId, text, title }
   ) => {
-    const publishedAt = serverTimestamp()
-    const userId = state.authId
-    const thread = { forumId, publishedAt, title, userId }
-
     try {
+      const publishedAt = serverTimestamp()
+      const userId = state.authId
+      const thread = { forumId, publishedAt, title, userId }
+
       // --- Firestore
       // chaninable batch.
       const newThreadRef = doc(collection(db, 'threads'))
@@ -330,7 +336,14 @@ export default {
   },
   createUser: async (
     { commit },
-    { id, name, username, email, avatar = null, registeredAt = serverTimestamp() }
+    {
+      id,
+      name,
+      username,
+      email,
+      avatar = null,
+      registeredAt = serverTimestamp()
+    }
   ) => {
     try {
       const user = {

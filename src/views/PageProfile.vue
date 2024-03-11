@@ -3,6 +3,7 @@ import PostList from '@/components/PostList.vue'
 import UserProfileCard from '@/components/UserProfileCard.vue'
 import UserProfileCardEditor from '@/components/UserProfileCardEditor.vue'
 import { mapGetters } from 'vuex'
+import store from '@/store'
 
 export default {
   components: { PostList, UserProfileCard, UserProfileCardEditor },
@@ -14,6 +15,16 @@ export default {
   },
   computed: {
     ...mapGetters({ user: 'authUser' })
+  },
+  beforeRouteEnter (to, from) {
+    // this.$store is not avail since component has not yet loaded. Hence import the store instead.
+    if (!store.state.authId) return { name: 'Home' }
+  },
+  // navigate to another route that uses same component. i.e PageThread component
+  beforeRouteUpdate (to, from) {},
+  beforeRouteLeave (to, from) {},
+  created () {
+    this.$emit('ready')
   }
 }
 </script>
@@ -21,6 +32,7 @@ export default {
 <template>
   <div class="flex-grid">
     <div class="col-3 push-top">
+      <h1>My profile</h1>
       <UserProfileCardEditor v-if="edit" :user="user" />
       <UserProfileCard v-else :user="user" />
     </div>

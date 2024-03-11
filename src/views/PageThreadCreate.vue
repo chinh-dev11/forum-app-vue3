@@ -13,6 +13,11 @@ export default {
       required: true
     }
   },
+  data () {
+    return {
+      formIsDirty: false
+    }
+  },
   computed: {
     forum () {
       return findById(this.$store.state.forums, this.forumId)
@@ -27,10 +32,23 @@ export default {
         forumId: this.forum.id
       })
 
-      this.$router.push({ name: 'Thread', params: { threadId: thread.id } })
+      if (!thread.error) {
+        this.$router.push({ name: 'Thread', params: { threadId: thread.id } })
+      }
+
+      // TODO: manage error
     },
     cancel () {
       this.$router.push({ name: 'Forum', params: { forumId: this.forum.id } })
+    }
+  },
+  beforeRouteLeave (to, from) {
+    // TODO: cancel must not redirect to Forum page when there's change in the form. But after cancel the confirm window, click on cancel again redirects to Forum page (formIsDirty is no longer true???)
+    if (this.formIsDirty) {
+      const confirmed = window.confirm(
+        'Are you sure you want to leave? Unsaved changes will be lost!'
+      )
+      if (!confirmed) return false
     }
   },
   async created () {
@@ -47,7 +65,12 @@ export default {
       <h1>
         Create new thread in <i>{{ forum.name }}</i>
       </h1>
-      <ThreadEditor @save="save" @cancel="cancel" />
+      <ThreadEditor
+        @save="save"
+        @cancel="cancel"
+        @dirty="formIsDirty = true"
+        @clean="formIsDirty = false"
+      />
     </div>
   </div>
 </template>

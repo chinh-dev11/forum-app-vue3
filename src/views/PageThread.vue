@@ -1,7 +1,7 @@
 <script>
 import PostList from '@/components/PostList.vue'
 import PostEditor from '@/components/PostEditor.vue'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import { flatFilterValues } from '@/helpers'
 import asyncDataStatus from '@/mixins/asyncDataStatus'
 
@@ -15,6 +15,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['authUser']),
     thread () {
       return this.$store.getters.thread(this.threadId)
     },
@@ -22,9 +23,6 @@ export default {
       return this.$store.state.posts.filter(
         ({ threadId }) => threadId === this.thread.id
       )
-    },
-    isUserAuthenticated () {
-      return this.$store.getters.authUser.id
     }
   },
   methods: {
@@ -78,7 +76,7 @@ export default {
         >
       </p>
       <PostList :posts="threadPosts" />
-      <PostEditor v-if="isUserAuthenticated" @save="savePost" />
+      <PostEditor v-if="authUser.id" @save="savePost" />
     </div>
   </div>
 </template>
