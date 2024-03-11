@@ -40,11 +40,8 @@ const routes = [
     name: 'Profile',
     path: '/me',
     component: PageProfile,
-    meta: { toTop: true, smothScroll: true }, // scroll top smoothly. e.g. in case when editing profile.
-    beforeEnter (to, from) {
-      // this.$store is not avail since component has not yet loaded. Hence import the store instead.
-      if (!store.state.authId) return { name: 'Home' }
-    },
+    meta: { toTop: true, smothScroll: true, requiresAuth: true }, // scroll top smoothly. e.g. in case when editing profile.
+    beforeEnter (to, from) {},
     beforeUpdate (to, from) {},
     beforeLeave (to, from) {}
   },
@@ -108,8 +105,10 @@ const router = createRouter({
   }
 })
 
-router.beforeEach(() => {
+router.beforeEach((to, from) => {
   store.dispatch('unsubscribeAllSnapshots') // unregister Firestore realtime updates listeners when route changes.
+
+  if (to.meta.requiresAuth && !store.state.authId) return { name: 'Home' }
 })
 
 export default router
