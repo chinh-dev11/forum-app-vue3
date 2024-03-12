@@ -46,6 +46,7 @@ export default {
       }
 
       // TODO: manage error
+      console.error(thread.error)
     },
     cancel () {
       this.$router.push({

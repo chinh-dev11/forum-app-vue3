@@ -35,7 +35,8 @@ const routes = [
     name: 'ProfileEdit',
     path: '/me/edit',
     component: PageProfile,
-    props: { edit: true } // pass in 'edit' prop as boolean type (true/false).
+    props: { edit: true }, // pass in 'edit' prop as boolean type (true/false).
+    meta: { requiresAuth: true }
   },
   {
     name: 'Profile',
@@ -79,13 +80,15 @@ const routes = [
     name: 'ThreadCreate',
     path: '/forum/:forumId/thread/create',
     component: PageThreadCreate,
-    props: true
+    props: true,
+    meta: { requiresAuth: true }
   },
   {
     name: 'ThreadEdit',
     path: '/thread/:threadId/edit',
     component: PageThreadEdit,
-    props: true
+    props: true,
+    meta: { requiresAuth: true }
   },
   { name: 'Home', path: '/', component: PageHome },
   { name: 'NotFound', path: '/:pathMatch(.*)*', component: PageNotFound }

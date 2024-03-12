@@ -48,7 +48,7 @@ export default {
         resolve(user)
       })
 
-      commit('setAuthObserverUnsubscribe', unsubscribe) // subscribe new auth observer.
+      commit('setAuthObserverUnsubscribe', unsubscribe) // keep unsubscribe function reference, to be called to unsubscribe auth observer.
     })
   },
   // ------ Fetch single resource.
@@ -152,11 +152,11 @@ export default {
 
   // ------ Create/Update resource.
   updateThread: async ({ state }, { title, text, id }) => {
-    const { id: threadId, posts: threadPosts } = findById(state.threads, id)
-    // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
-    const { id: postId } = findById(state.posts, threadPosts[0])
-
     try {
+      const { id: threadId, posts: threadPosts } = findById(state.threads, id)
+      // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
+      const { id: postId } = findById(state.posts, threadPosts[0])
+
       // --- Firestore
       const threadRef = doc(db, 'threads', threadId)
       const postRef = doc(db, 'posts', postId)

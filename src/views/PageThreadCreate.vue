@@ -37,6 +37,7 @@ export default {
       }
 
       // TODO: manage error
+      console.error(thread.error)
     },
     cancel () {
       this.$router.push({ name: 'Forum', params: { forumId: this.forum.id } })
