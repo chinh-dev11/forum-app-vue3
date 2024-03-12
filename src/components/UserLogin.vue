@@ -15,11 +15,15 @@ export default {
   },
   methods: {
     ...mapActions(['signInUser', 'signInUserWithGoogle']),
+    successRedirect () {
+      const redirectTo = this.$route.query.redirectTo || { name: 'Home' }
+      this.$router.push(redirectTo)
+    },
     async signInWithGoogle () {
       const user = await this.signInUserWithGoogle()
 
       if (user?.id) {
-        this.$router.push({ name: 'Home' })
+        this.successRedirect()
         return
       }
 
@@ -35,7 +39,7 @@ export default {
       const res = await this.signInUser(this.form)
 
       if (res.user?.uid) {
-        this.$router.push({ name: 'Home' })
+        this.successRedirect()
         return
       }
 

@@ -115,7 +115,9 @@ router.beforeEach(async (to, from) => {
 
   await store.dispatch('initAuthentication') // ensure authId is set before checking its value.
 
-  if (to.meta.requiresAuth && !store.state.authId) return { name: 'Login' } // unauthenticated user
+  if (to.meta.requiresAuth && !store.state.authId) {
+    return { name: 'Login', query: { redirectTo: to.path } } // unauthenticated user
+  }
 
   if (to.meta.requiresGuest && store.state.authId) return { name: 'Home' } // authenticated user
 })
