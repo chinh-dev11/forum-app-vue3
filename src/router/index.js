@@ -16,7 +16,8 @@ const routes = [
   {
     name: 'Login',
     path: '/login',
-    component: UserLogin
+    component: UserLogin,
+    meta: { requiresGuest: true }
   },
   {
     name: 'Logout',
@@ -29,7 +30,8 @@ const routes = [
   {
     name: 'Register',
     path: '/register',
-    component: UserRegister
+    component: UserRegister,
+    meta: { requiresGuest: true }
   },
   {
     name: 'ProfileEdit',
@@ -42,10 +44,10 @@ const routes = [
     name: 'Profile',
     path: '/me',
     component: PageProfile,
-    meta: { toTop: true, smothScroll: true, requiresAuth: true }, // scroll top smoothly. e.g. in case when editing profile.
-    beforeEnter (to, from) {},
-    beforeUpdate (to, from) {},
-    beforeLeave (to, from) {}
+    meta: { toTop: true, smothScroll: true, requiresAuth: true } // scroll top smoothly. e.g. in case when editing profile.
+    // beforeEnter (to, from) {},
+    // beforeUpdate (to, from) {},
+    // beforeLeave (to, from) {}
   },
   {
     name: 'Category',
@@ -113,7 +115,9 @@ router.beforeEach(async (to, from) => {
 
   await store.dispatch('initAuthentication') // ensure authId is set before checking its value.
 
-  if (to.meta.requiresAuth && !store.state.authId) return { name: 'Home' }
+  if (to.meta.requiresAuth && !store.state.authId) return { name: 'Login' } // unauthenticated user
+
+  if (to.meta.requiresGuest && store.state.authId) return { name: 'Home' } // authenticated user
 })
 
 export default router

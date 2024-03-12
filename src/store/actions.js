@@ -180,8 +180,11 @@ export default {
     { forumId, text, title }
   ) => {
     try {
-      const publishedAt = serverTimestamp()
       const userId = state.authId
+
+      if (!userId) return { error: 'Authentication required.' }
+
+      const publishedAt = serverTimestamp()
       const thread = { forumId, publishedAt, title, userId }
 
       // --- Firestore
