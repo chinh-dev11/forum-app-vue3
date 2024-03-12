@@ -93,13 +93,14 @@ export default {
       const unsubscribe = onSnapshot(
         resourceRef,
         (snapshot) => {
-          if (!snapshot.exists()) return {}
+          if (snapshot.exists()) {
+            const item = docToResource(snapshot)
+            commit('setItem', { resource, item }) // update local store state.
 
-          const item = docToResource(snapshot)
-
-          commit('setItem', { resource, item }) // update local store state.
-
-          resolve(item)
+            resolve(item)
+          } else {
+            resolve(null)
+          }
         },
         (err) => {
           reject(err)

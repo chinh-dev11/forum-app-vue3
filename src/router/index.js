@@ -10,6 +10,7 @@ import PageThreadEdit from '@/views/PageThreadEdit.vue'
 import UserRegister from '@/components/UserRegister.vue'
 import UserLogin from '@/components/UserLogin.vue'
 import store from '@/store'
+import { findById } from '@/helpers'
 
 const routes = [
   {
@@ -56,15 +57,14 @@ const routes = [
     name: 'Thread',
     path: '/thread/:threadId',
     component: PageThread,
-    props: true
-    // TODO: find a better solution of route guarding
-    /* beforeEnter (to, from, next) {
-      const threadExists = dataSource.threads.find(
-        (t) => t.id === to.params.id
-      )
+    props: true,
+    async beforeEnter (to, from, next) {
+      await store.dispatch('fetchThread', { id: to.params.threadId })
+
+      const threadExists = findById(store.state.threads, to.params.threadId)
 
       if (threadExists) {
-        return next()
+        next()
       } else {
         next({
           name: 'NotFound',
@@ -73,7 +73,7 @@ const routes = [
           hash: to.hash
         })
       }
-    } */
+    }
   },
   {
     name: 'ThreadCreate',
