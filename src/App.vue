@@ -33,7 +33,8 @@ export default {
 
 <template>
   <TheNavbar @ready="onPageReady" />
-  <router-view v-show="showPage" @ready="onPageReady" />
+  <!-- by adding the 'key' attribut with unique value (the route path) to force Vue Router to destroy component thus trigger the lifecycle hooks. -->
+  <router-view v-show="showPage" @ready="onPageReady" :key="$route.path" />
   <AppSpinner v-show="!showPage" />
 </template>
 
