@@ -15,7 +15,9 @@ import {
   serverTimestamp,
   writeBatch,
   increment,
-  onSnapshot
+  onSnapshot,
+  query,
+  where
 } from 'firebase/firestore'
 import firebaseConfig from '@/config/firebase'
 import {
@@ -118,6 +120,28 @@ export default {
   },
 
   // ------ Fetch multiple resources.
+  fetchAuthUserPosts: async ({ commit, state }) => {
+    try {
+      const q = query(collection(db, 'posts'), where('userId', '==', state.authId))
+      const querySnapshot = await getDocs(q)
+
+      return querySnapshot.docs.map(doc => {
+        const docData = doc.data()
+        const item = {
+          ...docData,
+          id: doc.id,
+          publishedAt: docData.publishedAt.seconds
+        }
+
+        commit('setItem', { resource: 'posts', item })
+
+        return item
+      })
+    } catch (err) {
+      console.error(err)
+      return { error: err }
+    }
+  },
   fetchAllCategories: ({ dispatch }) =>
     dispatch('fetchAll', { resource: 'categories' }),
   fetchForums: ({ dispatch }, { ids }) =>
@@ -143,9 +167,9 @@ export default {
 
     if (docSnap.empty) return []
 
-    const all = docSnap.docs.map((doc) => docToResource(doc))
+    const all = docSnap.docs.map((doc) => docToResource(doc)) // read from Firestore.
 
-    commit('setItems', { resource, items: all })
+    commit('setItems', { resource, items: all }) // write to the store.
 
     return all
   },

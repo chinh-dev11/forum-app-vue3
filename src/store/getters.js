@@ -13,6 +13,9 @@ export default {
       return {
         ...user,
         // 'get' acts as a property. e.g. user.posts
+        get posts () {
+          return state.posts.filter(({ userId }) => userId === user.id)
+        },
         get postsCount () {
           return user.postsCount || 0
         },

@@ -3,9 +3,11 @@ import PostList from '@/components/PostList.vue'
 import UserProfileCard from '@/components/UserProfileCard.vue'
 import UserProfileCardEditor from '@/components/UserProfileCardEditor.vue'
 import { mapGetters } from 'vuex'
+import asyncDataStatus from '@/mixins/asyncDataStatus'
 
 export default {
   components: { PostList, UserProfileCard, UserProfileCardEditor },
+  mixins: [asyncDataStatus],
   props: {
     edit: {
       type: Boolean,
@@ -15,8 +17,15 @@ export default {
   computed: {
     ...mapGetters({ user: 'authUser' })
   },
-  created () {
-    this.$emit('ready')
+  async created () {
+    // fetch user's posts before displaying the page
+    const posts = await this.$store.dispatch('fetchAuthUserPosts')
+
+    this.asyncDataStatus_fetched()
+
+    if (posts.error) {
+    // TODO: manage error
+    }
   }
 }
 </script>
@@ -24,7 +33,6 @@ export default {
 <template>
   <div class="flex-grid">
     <div class="col-3 push-top">
-      <h1>My profile</h1>
       <UserProfileCardEditor v-if="edit" :user="user" />
       <UserProfileCard v-else :user="user" />
     </div>
@@ -37,7 +45,7 @@ export default {
 
       <hr />
 
-      <PostList :posts="user.posts || []" />
+      <PostList :posts="user.posts" />
       <!-- <div class="activity-list">
         <div class="activity">
           <div class="activity-header">
