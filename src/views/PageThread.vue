@@ -23,6 +23,9 @@ export default {
       return this.$store.state.posts.filter(
         ({ threadId }) => threadId === this.thread.id
       )
+    },
+    canEditThread () {
+      return this.thread.userId === this.authUser.id
     }
   },
   methods: {
@@ -52,6 +55,7 @@ export default {
       <h1>
         {{ thread.title }}
         <router-link
+          v-if="canEditThread"
           :to="{ name: 'ThreadEdit', params: { threadId: thread.id } }"
           v-slot="{ navigate }"
           class="btn-green btn-small"
@@ -77,6 +81,17 @@ export default {
       </p>
       <PostList :posts="threadPosts" />
       <PostEditor v-if="authUser.id" @save="savePost" />
+      <div v-else class="text-center">
+        <router-link :to="{ name: 'Login', query: { redirectTo: $route.path } }"
+          >Sign In</router-link
+        >
+        or
+        <router-link
+          :to="{ name: 'Register', query: { redirectTo: $route.path } }"
+          >Register</router-link
+        >
+        to edit and/or reply.
+      </div>
     </div>
   </div>
 </template>
