@@ -414,8 +414,20 @@ export default {
       return { error }
     }
   },
-  updateUser: ({ commit }, user) =>
-    commit('setItem', { resource: 'users', item: user }),
+  updateUser: async ({ commit }, user) => {
+    console.log('user', user)
+    try {
+      // write to Firestore.
+      const userRef = doc(db, 'users', user.id)
+      await updateDoc(userRef, user)
+
+      // write to the store.
+      commit('setItem', { resource: 'users', item: user })
+    } catch (err) {
+      console.error(err)
+      return { error: err }
+    }
+  },
 
   // ------ Memory leaks, performance issues.
   // unsubscribe Firestore realtime updates listeners (onSnapshot).

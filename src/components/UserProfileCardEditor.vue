@@ -18,8 +18,12 @@ export default {
   methods: {
     ...mapActions(['updateUser']),
     save () {
-      this.updateUser({ ...this.activeUser }) // clone the activeUser object: to prevent changes referenced to it before it's actually set to the users.
+      const userUpdated = this.updateUser({ ...this.activeUser }) // clone the activeUser object: to prevent changes referenced to it before it's actually set to the users.
       this.$router.push({ name: 'Profile' }) // redirect to the profile page after save.
+
+      if (userUpdated.error) {
+        // TODO: manage error
+      }
     },
     cancel () {
       // might want to notity the user of the change might be lost if continue.
