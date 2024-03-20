@@ -1,13 +1,25 @@
-import { findById, docToResource, makeAppendChildToParentMutation } from '@/helpers'
-import { doc, writeBatch, serverTimestamp, collection, arrayUnion, getDoc } from 'firebase/firestore'
+import {
+  findById,
+  docToResource,
+  makeAppendChildToParentMutation
+} from '@/helpers'
+import {
+  doc,
+  writeBatch,
+  serverTimestamp,
+  collection,
+  arrayUnion,
+  getDoc
+} from 'firebase/firestore'
 import { db } from '@/firebase'
 
 export default {
+  namespaced: true,
   state: {
-    items: [] // state.threads.items
+    items: []
   },
   getters: {
-    thread: (state) => {
+    thread: (state, getters, rootState) => {
       return (id) => {
         const thread = findById(state.items, id)
 
@@ -16,7 +28,7 @@ export default {
         return {
           ...thread,
           get author () {
-            return findById(state.users, thread.userId)
+            return findById(rootState.users.items, thread.userId)
           },
           get repliesCount () {
             return thread.posts?.length - 1 || 0 // -1: since the 1st post is not of a reply but an inital post of the thread.
@@ -30,14 +42,17 @@ export default {
   },
   actions: {
     fetchThread: ({ dispatch }, { id }) =>
-      dispatch('fetchItem', { resource: 'threads', id }),
+      dispatch('fetchItem', { resource: 'threads', id }, { root: true }),
     fetchThreads: ({ dispatch }, { ids }) =>
-      dispatch('fetchItems', { resource: 'threads', ids }),
-    updateThread: async ({ state }, { title, text, id }) => {
+      dispatch('fetchItems', { resource: 'threads', ids }, { root: true }),
+    updateThread: async (
+      { state, getters, rootState },
+      { title, text, id }
+    ) => {
       try {
         const { id: threadId, posts: threadPosts } = findById(state.items, id)
         // the 1st post, at index [0], is created when the thread was first created. Hence using its value as id to find the post to update.
-        const { id: postId } = findById(state.posts, threadPosts[0])
+        const { id: postId } = findById(rootState.posts.items, threadPosts[0])
 
         // --- Firestore
         const threadRef = doc(db, 'threads', threadId)
@@ -86,24 +101,36 @@ export default {
           .commit()
 
         // --- local store
-        commit('appendThreadToForum', {
-          parentId: forumId,
-          childId: newThreadRef.id
-        })
-        commit('appendThreadToUser', {
-          parentId: userId,
-          childId: newThreadRef.id
-        })
+        commit(
+          'forums/appendThreadToForum',
+          {
+            parentId: forumId,
+            childId: newThreadRef.id
+          },
+          { root: true }
+        )
+        commit(
+          'users/appendThreadToUser',
+          {
+            parentId: userId,
+            childId: newThreadRef.id
+          },
+          { root: true }
+        )
 
         // to store same data to local store as in Firestore (i.e. timestamp).
         const threadDoc = await getDoc(newThreadRef)
-        commit('setItem', {
-          resource: 'threads',
-          item: docToResource(threadDoc)
-        })
+        commit(
+          'setItem',
+          {
+            resource: 'threads',
+            item: docToResource(threadDoc)
+          },
+          { root: true }
+        )
 
         const post = { text, threadId: newThreadRef.id }
-        await dispatch('createPost', { post }) // add the initial post of the new thread to posts.
+        await dispatch('posts/createPost', { post }, { root: true }) // add the initial post of the new thread to posts.
 
         return findById(state.items, newThreadRef.id)
       } catch (error) {

@@ -1,15 +1,22 @@
 import { findById, makeAppendChildToParentMutation } from '@/helpers'
-import { serverTimestamp, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore'
+import {
+  serverTimestamp,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc
+} from 'firebase/firestore'
 import { db } from '@/firebase'
 
 export default {
+  namespaced: true,
   state: {
     items: []
   },
   getters: {
-    user: (state) => {
+    user: (state, getters, rootState) => {
       return (id) => {
-        const user = findById(state.users.items, id)
+        const user = findById(state.items, id)
 
         if (!user) return {}
 
@@ -17,13 +24,17 @@ export default {
           ...user,
           // 'get' acts as a property. e.g. user.posts
           get posts () {
-            return state.posts.items.filter(({ userId }) => userId === user.id)
+            return rootState.posts.items.filter(
+              ({ userId }) => userId === user.id
+            )
           },
           get postsCount () {
             return user.postsCount || 0
           },
           get threads () {
-            return state.threads.items.filter(({ userId }) => userId === user.id)
+            return rootState.threads.items.filter(
+              ({ userId }) => userId === user.id
+            )
           },
           get threadsCount () {
             return user.threads?.length || 0
@@ -34,9 +45,13 @@ export default {
   },
   actions: {
     fetchUser: ({ dispatch }, { id, handleUnsubscribe }) =>
-      dispatch('fetchItem', { resource: 'users', id, handleUnsubscribe }),
+      dispatch(
+        'fetchItem',
+        { resource: 'users', id, handleUnsubscribe },
+        { root: true }
+      ),
     fetchUsers: ({ dispatch }, { ids }) =>
-      dispatch('fetchItems', { resource: 'users', ids }),
+      dispatch('fetchItems', { resource: 'users', ids }, { root: true }),
     createUser: async (
       { commit },
       {
@@ -69,7 +84,7 @@ export default {
         if (!newUserSnap.exists()) return {}
 
         const newUser = newUserSnap.data()
-        commit('setItem', { resource: 'users', item: newUser })
+        commit('setItem', { resource: 'users', item: newUser }, { root: true })
 
         return newUser
       } catch (error) {
@@ -77,14 +92,13 @@ export default {
       }
     },
     updateUser: async ({ commit }, user) => {
-      console.log('user', user)
       try {
         // write to Firestore.
         const userRef = doc(db, 'users', user.id)
         await updateDoc(userRef, user)
 
         // write to the store.
-        commit('setItem', { resource: 'users', item: user })
+        commit('setItem', { resource: 'users', item: user }, { root: true })
       } catch (err) {
         console.error(err)
         return { error: err }

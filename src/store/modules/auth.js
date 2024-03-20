@@ -1,16 +1,24 @@
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth'
+import {
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  signOut,
+  createUserWithEmailAndPassword
+} from 'firebase/auth'
 import { auth, db } from '@/firebase'
 import { query, collection, where, getDocs } from 'firebase/firestore'
 
 export default {
+  namespaced: true,
   state: {
     authId: null,
     authUserUnsubscribe: null,
     authObserverUnsubscribe: null
   },
   getters: {
-    authUser: (state, getters) => {
-      return getters.user(state.authId)
+    authUser: (state, getters, rootState, rootGetters) => {
+      return rootGetters['users/user'](state.authId)
     }
   },
   actions: {
@@ -41,10 +49,14 @@ export default {
 
         const handleUnsubscribe = (unsubscribe) =>
           commit('setAuthUserUnsubscribe', unsubscribe)
-        const user = await dispatch('fetchUser', {
-          id: userId,
-          handleUnsubscribe
-        })
+        const user = await dispatch(
+          'users/fetchUser',
+          {
+            id: userId,
+            handleUnsubscribe
+          },
+          { root: true }
+        )
 
         return { id: user.id }
       } catch (error) {
@@ -53,10 +65,13 @@ export default {
     },
     fetchAuthUserPosts: async ({ commit, state }) => {
       try {
-        const q = query(collection(db, 'posts'), where('userId', '==', state.authId))
+        const q = query(
+          collection(db, 'posts'),
+          where('userId', '==', state.authId)
+        )
         const querySnapshot = await getDocs(q)
 
-        return querySnapshot.docs.map(doc => {
+        return querySnapshot.docs.map((doc) => {
           const docData = doc.data()
           const item = {
             ...docData,
@@ -64,7 +79,7 @@ export default {
             publishedAt: docData.publishedAt.seconds
           }
 
-          commit('setItem', { resource: 'posts', item })
+          commit('setItem', { resource: 'posts', item }, { root: true })
 
           return item
         })
@@ -88,7 +103,7 @@ export default {
           registeredAt: user.metadata.createdAt
         }
 
-        return await dispatch('createUser', newUser)
+        return await dispatch('users/createUser', newUser, { root: true })
       } catch (error) {
         return { error }
       }
@@ -125,7 +140,7 @@ export default {
 
         user.id = userCredentialUid
 
-        return await dispatch('createUser', user) // add user to Firestore and local store
+        return await dispatch('users/createUser', user, { root: true }) // add user to Firestore and local store
       } catch (error) {
         return { error }
       }
@@ -141,8 +156,14 @@ export default {
     }
   },
   mutations: {
-    setAuthId: (state, id) => { state.authId = id },
-    setAuthUserUnsubscribe: (state, unsubscribe) => { state.authUserUnsubscribe = unsubscribe },
-    setAuthObserverUnsubscribe: (state, unsubscribe) => { state.authObserverUnsubscribe = unsubscribe }
+    setAuthId: (state, id) => {
+      state.authId = id
+    },
+    setAuthUserUnsubscribe: (state, unsubscribe) => {
+      state.authUserUnsubscribe = unsubscribe
+    },
+    setAuthObserverUnsubscribe: (state, unsubscribe) => {
+      state.authObserverUnsubscribe = unsubscribe
+    }
   }
 }

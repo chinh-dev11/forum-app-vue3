@@ -1,25 +1,28 @@
 const findById = (resources, id) => {
-  return resources.find(r => r.id === id)
+  return resources.find((r) => r.id === id)
 }
 
 const findIndexById = (resources, id) => {
-  return resources.findIndex(r => r.id === id)
+  return resources.findIndex((r) => r.id === id)
 }
 
 const filterById = (resources, id) => {
-  return resources.filter(r => r.id === id)
+  return resources.filter((r) => r.id === id)
 }
 
 const upSert = (resources, data) => {
   const index = resources.findIndex(({ id }) => id === data.id)
 
-  if (index === -1) resources.push(data) // insert (data id not found in resources)
-  else resources[index] = { ...resources[index], ...data } // update
+  if (index === -1) {
+    resources.push(data) // insert (data id not found in resources)
+  } else {
+    resources[index] = { ...resources[index], ...data } // update
+  }
 }
 
 // flatten array and filter out any duplicates, null, empty, undefined values.
 const flatFilterValues = (values) => {
-  return [...new Set(values.flat().filter(value => value))]
+  return [...new Set(values.flat().filter((value) => value))]
 }
 
 const docToResource = (doc) => {
@@ -30,10 +33,13 @@ const docToResource = (doc) => {
 
 const makeAppendChildToParentMutation = ({ parent, child }) => {
   return (state, { childId, parentId }) => {
-    const resource = findById(state[parent], parentId)
+    // since this mutation will be inside a module, hence we have direct access to the module state items.
+    const resource = findById(state.items, parentId)
 
     if (!resource) {
-      console.warn(`Append child:${child}:${childId} to parent:${parent}:${parentId} failed because the parent:${parent} didin't exist`)
+      console.warn(
+        `Append child:${child}:${childId} to parent:${parent}:${parentId} failed because the parent:${parent} didin't exist`
+      )
       return
     }
 

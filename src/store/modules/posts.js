@@ -1,24 +1,38 @@
-import { serverTimestamp, doc, updateDoc, getDoc, collection, addDoc, arrayUnion, increment } from 'firebase/firestore'
+import {
+  serverTimestamp,
+  doc,
+  updateDoc,
+  getDoc,
+  collection,
+  addDoc,
+  arrayUnion,
+  increment
+} from 'firebase/firestore'
 import { db } from '@/firebase'
 import { docToResource } from '@/helpers'
 
 export default {
+  namespaced: true,
   state: {
     items: []
   },
   getters: {},
   actions: {
     fetchPost: ({ dispatch }, { id, emoji }) =>
-      dispatch('fetchItem', { resource: 'posts', id, emoji }),
+      dispatch('fetchItem', { resource: 'posts', id, emoji }, { root: true }),
     fetchPosts: ({ dispatch }, { ids }) =>
-      dispatch('fetchItems', { resource: 'posts', ids, emoji: '🙂' }),
-    updatePost: async ({ commit, state }, { id, text }) => {
+      dispatch(
+        'fetchItems',
+        { resource: 'posts', ids, emoji: '🙂' },
+        { root: true }
+      ),
+    updatePost: async ({ commit, state, rootState }, { id, text }) => {
       try {
         const post = {
           text,
           edited: {
             at: serverTimestamp(),
-            by: state.authId,
+            by: rootState.auth.authId,
             moderated: false
           }
         }
@@ -31,18 +45,22 @@ export default {
 
         // update local store
         const updatedPost = await getDoc(postRef)
-        commit('setItem', {
-          resource: 'posts',
-          item: docToResource(updatedPost)
-        })
+        commit(
+          'setItem',
+          {
+            resource: 'posts',
+            item: docToResource(updatedPost)
+          },
+          { root: true }
+        )
       } catch (error) {
         return { error }
       }
     },
-    createPost: async ({ dispatch, commit, state }, { post }) => {
+    createPost: async ({ dispatch, commit, state, rootState }, { post }) => {
       // TODO: postsCount is randomly reset to 1 (async issue???)
       try {
-        post.userId = state.authId
+        post.userId = rootState.auth.authId
         post.publishedAt = serverTimestamp()
 
         // --- Firestore
@@ -55,25 +73,37 @@ export default {
           contributors: arrayUnion(post.userId) // append the user id to the thread contributors.
         })
 
-        const userRef = doc(db, 'users', post.userId)
+        const userRef = doc(db, 'users', rootState.auth.authId)
         updateDoc(userRef, {
           postsCount: increment(1) // increment at every post creation
         })
 
         // --- local store
         const postDoc = (await getDoc(newPostRef)).data() // to store same data to local store as in Firestore (i.e. timestamp).
-        commit('setItem', {
-          resource: 'posts',
-          item: { ...postDoc, id: newPostRef.id }
-        })
-        commit('appendPostToThread', {
-          childId: newPostRef.id,
-          parentId: postDoc.threadId
-        })
-        commit('appendContributorToThread', {
-          childId: postDoc.userId,
-          parentId: postDoc.threadId
-        })
+        commit(
+          'setItem',
+          {
+            resource: 'posts',
+            item: { ...postDoc, id: newPostRef.id }
+          },
+          { root: true }
+        )
+        commit(
+          'threads/appendPostToThread',
+          {
+            childId: newPostRef.id,
+            parentId: postDoc.threadId
+          },
+          { root: true }
+        )
+        commit(
+          'threads/appendContributorToThread',
+          {
+            childId: postDoc.userId,
+            parentId: postDoc.threadId
+          },
+          { root: true }
+        )
       } catch (error) {
         return { error }
       }
