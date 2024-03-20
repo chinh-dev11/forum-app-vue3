@@ -8,10 +8,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['authUser'])
+    ...mapGetters('auth', { user: 'authUser' })
   },
   methods: {
-    ...mapActions(['signOutUser']),
+    ...mapActions('auth', ['signOutUser']),
     async signOut () {
       await this.signOutUser()
       this.$emit('ready')
@@ -37,14 +37,14 @@ export default {
     <!-- use .navbar-open to open nav -->
     <nav :class="{ 'navbar-open': userDropdownOpen }" class="navbar">
       <ul>
-        <li v-if="authUser.id" class="navbar-user">
+        <li v-if="user.id" class="navbar-user">
           <a @click.prevent="userDropdownOpen = !userDropdownOpen" href="#"
             ><img
               class="avatar-small"
-              :src="authUser.avatar"
-              :alt="`${authUser.name} profile picture`" />
+              :src="user.avatar"
+              :alt="`${user.name} profile picture`" />
             <span>
-              {{ authUser.name }}
+              {{ user.name }}
               <img
                 class="icon-profile"
                 src="../assets/svg/arrow-profile.svg"

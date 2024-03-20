@@ -15,12 +15,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['authUser']),
+    ...mapGetters('auth', ['authUser']),
     thread () {
-      return this.$store.getters.thread(this.threadId)
+      return this.$store.getters['threads/thread'](this.threadId)
     },
     threadPosts () {
-      return this.$store.state.posts.filter(
+      return this.$store.state.posts.items.filter(
         ({ threadId }) => threadId === this.thread.id
       )
     },
@@ -29,7 +29,9 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['createPost', 'fetchThread', 'fetchPosts', 'fetchUsers']),
+    ...mapActions('posts', ['createPost', 'fetchPosts']),
+    ...mapActions('threads', ['fetchThread']),
+    ...mapActions('users', ['fetchUsers']),
     savePost ({ post }) {
       this.createPost({ post: { ...post, threadId: this.thread.id } })
     }

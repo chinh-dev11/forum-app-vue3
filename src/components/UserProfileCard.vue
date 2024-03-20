@@ -3,7 +3,8 @@ import { mapGetters } from 'vuex'
 
 export default {
   computed: {
-    ...mapGetters({ user: 'authUser' })
+    // ...mapGetters({ user: 'authUser' })
+    ...mapGetters('auth', { user: 'authUser' })
   }
 }
 </script>

@@ -20,11 +20,12 @@ export default {
   },
   computed: {
     forum () {
-      return findById(this.$store.state.forums, this.forumId)
+      return findById(this.$store.state.forums.items, this.forumId)
     }
   },
   methods: {
-    ...mapActions(['createThread', 'fetchForum']),
+    ...mapActions('threads', ['createThread']),
+    ...mapActions('forums', ['fetchForum']),
     async save ({ title, text }) {
       const thread = await this.createThread({
         title,

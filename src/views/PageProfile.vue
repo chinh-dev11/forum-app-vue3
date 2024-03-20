@@ -15,11 +15,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({ user: 'authUser' })
+    ...mapGetters('auth', { user: 'authUser' })
   },
   async created () {
     // fetch user's posts before displaying the page
-    const posts = await this.$store.dispatch('fetchAuthUserPosts')
+    const posts = await this.$store.dispatch('auth/fetchAuthUserPosts')
 
     this.asyncDataStatus_fetched()
 
@@ -46,6 +46,7 @@ export default {
       <hr />
 
       <PostList :posts="user.posts" />
+
       <!-- <div class="activity-list">
         <div class="activity">
           <div class="activity-header">

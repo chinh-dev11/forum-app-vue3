@@ -14,7 +14,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['registerUserWithEmailAndPassword', 'signInUserWithGoogle']),
+    ...mapActions('users', ['registerUserWithEmailAndPassword', 'signInUserWithGoogle']),
     async signUpWithGoogle () {
       const user = await this.signInUserWithGoogle()
 

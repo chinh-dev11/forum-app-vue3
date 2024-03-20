@@ -14,7 +14,7 @@ export default {
     this.$emit('ready')
   },
   methods: {
-    ...mapActions(['signInUser', 'signInUserWithGoogle']),
+    ...mapActions('auth', ['signInUser', 'signInUserWithGoogle']),
     successRedirect () {
       const redirectTo = this.$route.query.redirectTo || { name: 'Home' }
       this.$router.push(redirectTo)

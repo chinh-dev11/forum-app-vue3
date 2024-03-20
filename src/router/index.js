@@ -23,7 +23,7 @@ const routes = [
     name: 'Logout',
     path: '/logout',
     async beforeEnter (to, from) {
-      await store.dispatch('signOutUser')
+      await store.dispatch('auth/signOutUser')
       return { name: 'Home' }
     }
   },
@@ -62,9 +62,9 @@ const routes = [
     component: PageThread,
     props: true,
     async beforeEnter (to, from, next) {
-      await store.dispatch('fetchThread', { id: to.params.threadId })
+      await store.dispatch('threads/fetchThread', { id: to.params.threadId })
 
-      const threadExists = findById(store.state.threads, to.params.threadId)
+      const threadExists = findById(store.state.threads.items, to.params.threadId)
 
       if (threadExists) {
         next()
@@ -113,13 +113,13 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
   store.dispatch('unsubscribeAllSnapshots') // unregister Firestore realtime updates listeners when route changes.
 
-  await store.dispatch('initAuthentication') // ensure authId is set before checking its value.
+  await store.dispatch('auth/initAuthentication') // ensure authId is set before checking its value.
 
-  if (to.meta.requiresAuth && !store.state.authId) {
+  if (to.meta.requiresAuth && !store.state.auth.authId) {
     return { name: 'Login', query: { redirectTo: to.path } } // unauthenticated user
   }
 
-  if (to.meta.requiresGuest && store.state.authId) return { name: 'Home' } // authenticated user
+  if (to.meta.requiresGuest && store.state.auth.authId) return { name: 'Home' } // authenticated user
 })
 
 export default router

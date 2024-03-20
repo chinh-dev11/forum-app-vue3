@@ -73,11 +73,11 @@ export default {
       }
     },
     createThread: async (
-      { commit, state, dispatch },
+      { commit, state, dispatch, rootState },
       { forumId, text, title }
     ) => {
       try {
-        const userId = state.authId
+        const userId = rootState.auth.authId
 
         if (!userId) return { error: 'Authentication required.' }
 

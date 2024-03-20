@@ -11,7 +11,7 @@ export default {
   },
   methods: {
     getForumsForCategory (category) {
-      return this.$store.state.forums.filter(
+      return this.$store.state.forums.items.filter(
         ({ categoryId }) => categoryId === category.id
       )
     }

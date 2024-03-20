@@ -20,17 +20,18 @@ export default {
   },
   computed: {
     thread () {
-      return findById(this.$store.state.threads, this.threadId)
+      return findById(this.$store.state.threads.items, this.threadId)
     },
     text () {
       // the 1st post, at index [0], is created when the thread was first created. Hence using its id to find the post's text.
-      const post = findById(this.$store.state.posts, this.thread.posts[0])
+      const post = findById(this.$store.state.posts.items, this.thread.posts[0])
 
       return post ? post.text : ''
     }
   },
   methods: {
-    ...mapActions(['updateThread', 'fetchThread', 'fetchPost']),
+    ...mapActions('threads', ['updateThread', 'fetchThread']),
+    ...mapActions('posts', ['fetchPost']),
     async save ({ title, text }) {
       const thread = await this.updateThread({
         title,
