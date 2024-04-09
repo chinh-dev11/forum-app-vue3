@@ -33,6 +33,7 @@ export default {
 <template>
   <header
     v-click-outside="() => (mobileNavMenu = false)"
+    v-page-scroll="() => (mobileNavMenu = false)"
     class="header"
     id="header"
   >
