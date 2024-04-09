@@ -4,11 +4,12 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   data () {
     return {
-      userDropdownOpen: false
+      userDropdownOpen: false,
+      mobileNavMenu: false
     }
   },
   computed: {
-    ...mapGetters('auth', { user: 'authUser' })
+    ...mapGetters('auth', ['authUser'])
   },
   methods: {
     ...mapActions('auth', ['signOutUser']),
@@ -16,38 +17,50 @@ export default {
       await this.signOutUser()
       this.$emit('ready')
       this.userDropdownOpen = false
+      this.$router.push({ name: 'Home' })
     }
+  },
+  created () {
+    // route guard to close the mobile menu on route change.
+    // ie. when signOut, redirects to Home page.
+    this.$router.beforeEach((to, from) => {
+      this.mobileNavMenu = false
+    })
   }
 }
 </script>
 
 <template>
-  <header class="header" id="header">
+  <header
+    v-click-outside="() => (mobileNavMenu = false)"
+    class="header"
+    id="header"
+  >
     <router-link :to="{ name: 'Home' }" class="logo">
       <img src="../assets/svg/vueschool-logo.svg" />
     </router-link>
 
-    <!-- <div class="btn-hamburger"> -->
-    <!-- use .btn-humburger-active to open the menu -->
-    <!-- <div class="top bar"></div> -->
-    <!-- <div class="middle bar"></div> -->
-    <!-- <div class="bottom bar"></div> -->
-    <!-- </div> -->
+    <div @click="mobileNavMenu = !mobileNavMenu" class="btn-hamburger">
+      <!-- use .btn-humburger-active to open the menu -->
+      <div class="top bar"></div>
+      <div class="middle bar"></div>
+      <div class="bottom bar"></div>
+    </div>
 
     <!-- use .navbar-open to open nav -->
-    <nav :class="{ 'navbar-open': userDropdownOpen }" class="navbar">
+    <nav :class="{ 'navbar-open': mobileNavMenu }" class="navbar">
       <ul>
-        <li v-if="user.id" class="navbar-user">
+        <li v-if="authUser" class="navbar-user">
           <a
             @click.prevent="userDropdownOpen = !userDropdownOpen"
             v-click-outside="() => (userDropdownOpen = false)"
             href="#"
             ><img
               class="avatar-small"
-              :src="user.avatar"
-              :alt="`${user.name} profile picture`" />
+              :src="authUser.avatar"
+              :alt="`${authUser.name} profile picture`" />
             <span>
-              {{ user.name }}
+              {{ authUser.name }}
               <img
                 class="icon-profile"
                 src="../assets/svg/arrow-profile.svg"
@@ -61,9 +74,7 @@ export default {
             <div class="triangle-drop"></div>
             <ul class="dropdown-menu">
               <li class="dropdown-menu-item">
-                <router-link :to="{ name: 'Profile' }"
-                  >View profile</router-link
-                >
+                <router-link :to="{ name: 'Profile' }">My profile</router-link>
               </li>
               <li class="dropdown-menu-item">
                 <a @click.prevent="signOut" href="#">Log out</a>
@@ -71,14 +82,16 @@ export default {
             </ul>
           </div>
         </li>
-        <li v-else>
+        <li v-if="!authUser" class="navbar-user">
           <router-link :to="{ name: 'Login' }" class="mr-md">Login</router-link>
+        </li>
+        <li v-if="!authUser" class="navbar-user">
           <router-link :to="{ name: 'Register' }">Register</router-link>
         </li>
       </ul>
 
-      <!-- <ul> -->
-      <!-- <li class="navbar-item">
+      <ul>
+        <!-- <li class="navbar-item">
           <router-link :to="{ name: 'Home' }">Home</router-link>
         </li>
         <li class="navbar-item">
@@ -99,14 +112,20 @@ export default {
             >Thread</router-link
           >
         </li> -->
-      <!-- Show these option only on mobile-->
-      <!-- <li class="navbar-item mobile-only">
-          <a href="#">My Profile</a>
+        <!-- Show these option only on mobile-->
+        <li class="navbar-item mobile-only">
+          <router-link v-if="authUser" :to="{ name: 'Profile' }"
+            >My profile</router-link
+          >
+          <router-link v-else :to="{ name: 'Login' }" class="mr-md"
+            >Login</router-link
+          >
         </li>
         <li class="navbar-item mobile-only">
-          <a href="#">Logout</a>
-        </li> -->
-      <!-- </ul> -->
+          <a v-if="authUser" @click.prevent="signOut" href="#">Logout</a>
+          <router-link v-else :to="{ name: 'Register' }">Register</router-link>
+        </li>
+      </ul>
     </nav>
   </header>
 </template>

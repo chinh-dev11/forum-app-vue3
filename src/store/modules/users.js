@@ -18,7 +18,7 @@ export default {
       return (id) => {
         const user = findById(state.items, id)
 
-        if (!user) return {}
+        if (!user) return null
 
         return {
           ...user,
