@@ -2,7 +2,8 @@ import App from './App.vue'
 import { createApp } from 'vue'
 import router from '@/router'
 import store from '@/store'
-import fontAwesome from '@/plugins/FontAwesome'
+import FontAwesome from '@/plugins/FontAwesome'
+import ClickOutsideDirective from './plugins/ClickOutsideDirective'
 
 // --- forum App
 const forumApp = createApp(App)
@@ -10,7 +11,8 @@ const forumApp = createApp(App)
 // plugins
 forumApp.use(router)
 forumApp.use(store)
-forumApp.use(fontAwesome)
+forumApp.use(FontAwesome)
+forumApp.use(ClickOutsideDirective) // custom directive
 
 // The following snippet registers all base components, that prefix with 'App...' (i.e. AppDate). Hence no need to import them when use in other components.
 const requireComponent = require.context('./components', true, /App[A-Z]\w+\.(vue|js)$/)

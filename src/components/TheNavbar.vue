@@ -38,7 +38,10 @@ export default {
     <nav :class="{ 'navbar-open': userDropdownOpen }" class="navbar">
       <ul>
         <li v-if="user.id" class="navbar-user">
-          <a @click.prevent="userDropdownOpen = !userDropdownOpen" href="#"
+          <a
+            @click.prevent="userDropdownOpen = !userDropdownOpen"
+            v-click-outside="() => (userDropdownOpen = false)"
+            href="#"
             ><img
               class="avatar-small"
               :src="user.avatar"
