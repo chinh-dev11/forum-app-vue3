@@ -15,16 +15,30 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('auth', { user: 'authUser' })
+    ...mapGetters('auth', { user: 'authUser' }),
+    lastPostFetched () {
+      if (this.user.posts.length === 0) return null
+
+      return this.user.posts[this.user.posts.length - 1]
+    }
   },
   async created () {
-    // fetch user's posts before displaying the page
-    const posts = await this.$store.dispatch('auth/fetchAuthUserPosts')
+    // fetch user's posts before displaying the page.
+    const posts = await this.$store.dispatch('auth/fetchAuthUserPosts', {
+      lastPostFetched: this.lastPostFetched
+    })
+
+    // TEMP: mimic a scroll event to fetch the next posts.
+    setTimeout(async () => {
+      await this.$store.dispatch('auth/fetchAuthUserPosts', {
+        lastPostFetched: this.lastPostFetched
+      })
+    }, 2000)
 
     this.asyncDataStatus_fetched()
 
     if (posts.error) {
-    // TODO: manage error
+      // TODO: manage error
     }
   }
 }

@@ -7,7 +7,15 @@ import {
   createUserWithEmailAndPassword
 } from 'firebase/auth'
 import { auth, db } from '@/firebase'
-import { query, collection, where, getDocs } from 'firebase/firestore'
+import {
+  query,
+  collection,
+  where,
+  getDocs,
+  orderBy,
+  startAfter,
+  limit
+} from 'firebase/firestore'
 
 export default {
   namespaced: true,
@@ -63,12 +71,22 @@ export default {
         return { error }
       }
     },
-    fetchAuthUserPosts: async ({ commit, state }) => {
+    fetchAuthUserPosts: async ({ commit, state }, { lastPostFetched }) => {
       try {
-        const q = query(
+        const queryParams = [
           collection(db, 'posts'),
-          where('userId', '==', state.authId)
-        )
+          where('userId', '==', state.authId),
+          orderBy('publishedAt', 'desc'),
+          limit(10)
+        ]
+        /*
+        Pagination
+        - compound query requires indexes.
+        - if no indexes created, an error with a link to the Firestore Database for the creation, in the DevTools console. Or can be created manually at https://console.firebase.google.com/project/forum-app-vue3/firestore/databases/-default-/indexes
+        */
+        if (lastPostFetched) queryParams.push(startAfter(lastPostFetched.publishedAt))
+
+        const q = query(...queryParams)
         const querySnapshot = await getDocs(q)
 
         return querySnapshot.docs.map((doc) => {
@@ -76,7 +94,7 @@ export default {
           const item = {
             ...docData,
             id: doc.id,
-            publishedAt: docData.publishedAt.seconds
+            publishedAt: docData.publishedAt
           }
 
           commit('setItem', { resource: 'posts', item }, { root: true })
