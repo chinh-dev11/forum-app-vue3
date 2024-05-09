@@ -5,6 +5,15 @@ body {
     min-height: 100vh;
 }
 
+.Pagination {
+    margin: 40px !important;
+}
+.Pagination .Page-active {
+    color: white;
+}
+
+
+
 *, *:after, *:before {
     box-sizing: border-box;
 }

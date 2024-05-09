@@ -12,6 +12,7 @@ import {
   getDoc
 } from 'firebase/firestore'
 import { db } from '@/firebase'
+import chunk from 'lodash/chunk'
 
 export default {
   namespaced: true,
@@ -45,6 +46,13 @@ export default {
       dispatch('fetchItem', { resource: 'threads', id }, { root: true }),
     fetchThreads: ({ dispatch }, { ids }) =>
       dispatch('fetchItems', { resource: 'threads', ids }, { root: true }),
+    fetchThreadsByPage: ({ dispatch, commit }, { ids, page, perPage = 10 }) => {
+      commit('clearThreads')
+
+      const chunks = chunk(ids, perPage)
+      const limitedIds = chunks[page - 1]
+      return dispatch('fetchThreads', { ids: limitedIds })
+    },
     updateThread: async (
       { state, getters, rootState },
       { title, text, id }
@@ -146,6 +154,9 @@ export default {
     appendPostToThread: makeAppendChildToParentMutation({
       parent: 'threads',
       child: 'posts'
-    })
+    }),
+    clearThreads (state) {
+      state.items = []
+    }
   }
 }
