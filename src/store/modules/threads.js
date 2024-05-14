@@ -1,7 +1,9 @@
 import {
   findById,
   docToResource,
-  makeAppendChildToParentMutation
+  makeAppendChildToParentMutation,
+  makeFetchItemAction,
+  makeFetchItemsAction
 } from '@/helpers'
 import {
   doc,
@@ -42,10 +44,8 @@ export default {
     }
   },
   actions: {
-    fetchThread: ({ dispatch }, { id }) =>
-      dispatch('fetchItem', { resource: 'threads', id }, { root: true }),
-    fetchThreads: ({ dispatch }, { ids }) =>
-      dispatch('fetchItems', { resource: 'threads', ids }, { root: true }),
+    fetchThread: makeFetchItemAction({ resource: 'threads' }),
+    fetchThreads: makeFetchItemsAction({ resource: 'threads' }),
     fetchThreadsByPage: ({ dispatch, commit }, { ids, page, perPage = 10 }) => {
       commit('clearThreads')
 

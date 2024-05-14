@@ -62,7 +62,7 @@ const routes = [
     component: PageThread,
     props: true,
     async beforeEnter (to, from, next) {
-      await store.dispatch('threads/fetchThread', { id: to.params.threadId })
+      await store.dispatch('threads/fetchThread', { id: to.params.threadId, once: true })
 
       const threadExists = findById(store.state.threads.items, to.params.threadId)
 

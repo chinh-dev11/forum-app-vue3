@@ -4,7 +4,7 @@ import { docToResource } from '@/helpers'
 
 export default {
   // fetch the resource and subscribe for realtime updates
-  fetchItem: ({ commit }, { resource, id, handleUnsubscribe = null }) => {
+  fetchItem: ({ commit }, { resource, id, handleUnsubscribe = null, once = false }) => {
     return new Promise((resolve, reject) => {
       // using upgrade Firestore modular API.
       const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
@@ -12,6 +12,10 @@ export default {
       const unsubscribe = onSnapshot(
         resourceRef,
         (snapshot) => {
+          if (once) {
+            unsubscribe()
+          }
+
           if (snapshot.exists()) {
             const item = docToResource(snapshot)
             commit('setItem', { resource, item }) // update local store state.

@@ -50,7 +50,19 @@ const makeAppendChildToParentMutation = ({ parent, child }) => {
   }
 }
 
+const makeFetchItemAction = ({ resource }) => {
+  return ({ dispatch }, payload) =>
+    dispatch('fetchItem', { resource, ...payload }, { root: true })
+}
+
+const makeFetchItemsAction = ({ resource }) => {
+  return ({ dispatch }, payload) =>
+    dispatch('fetchItems', { resource, ...payload }, { root: true })
+}
+
 export {
+  makeFetchItemAction,
+  makeFetchItemsAction,
   makeAppendChildToParentMutation,
   docToResource,
   flatFilterValues,
