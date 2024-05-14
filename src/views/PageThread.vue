@@ -48,7 +48,7 @@ export default {
         cbOnSnapshot: ({ isLocal, previousItem }) => {
           if (!this.asyncDataStatus_ready || isLocal || (previousItem?.edited && !previousItem?.edited?.at)) return // no notification if initial fetch or in same browser tab.
 
-          this.addNotification({ message: 'Thread recently updated.' })
+          this.addNotification({ message: 'Thread recently updated.', timeout: 5000 })
         }
       })
       // fetch the posts associated users and the thread user.
@@ -70,7 +70,7 @@ export default {
         if (hasNewPosts) {
           this.fetchPostsWithUsers(newPosts)
         } else {
-          this.addNotification({ message: 'Thread recently updated.' })
+          this.addNotification({ message: 'Thread recently updated.', timeout: 5000 })
         }
       }
     })
