@@ -1,10 +1,10 @@
 import { doc, onSnapshot, collection, getDocs } from 'firebase/firestore'
 import { db } from '@/firebase'
-import { docToResource } from '@/helpers'
+import { docToResource, findById } from '@/helpers'
 
 export default {
   // fetch the resource and subscribe for realtime updates
-  fetchItem: ({ commit }, { resource, id, handleUnsubscribe = null, once = false }) => {
+  fetchItem: ({ state, commit }, { resource, id, handleUnsubscribe = null, once = false, cbOnSnapshot = null }) => {
     return new Promise((resolve, reject) => {
       // using upgrade Firestore modular API.
       const resourceRef = doc(db, resource, id) // id: key of the doc. e.g. for user: key is the user id.
@@ -18,7 +18,16 @@ export default {
 
           if (snapshot.exists()) {
             const item = docToResource(snapshot)
+
+            let previousItem = findById(state[resource].items, id)
+            previousItem = previousItem ? { ...previousItem } : null
+
             commit('setItem', { resource, item }) // update local store state.
+
+            if (typeof cbOnSnapshot === 'function') {
+              const isLocal = snapshot.metadata.hasPendingWrites
+              cbOnSnapshot({ item: { ...item }, previousItem, isLocal })
+            }
 
             resolve(item)
           } else {
@@ -39,11 +48,11 @@ export default {
       }
     })
   },
-  fetchItems: ({ dispatch }, { resource, ids, emoji }) => {
+  fetchItems: ({ dispatch }, { resource, ids, emoji, cbOnSnapshot = null }) => {
     if (!ids) return []
 
     return Promise.all(
-      ids.map((id) => dispatch('fetchItem', { resource, id, emoji }))
+      ids.map((id) => dispatch('fetchItem', { resource, id, emoji, cbOnSnapshot }))
     )
   },
   // fetch resources without listener for real-time updates

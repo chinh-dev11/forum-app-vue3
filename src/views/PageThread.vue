@@ -5,6 +5,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { flatFilterValues } from '@/helpers'
 import asyncDataStatus from '@/mixins/asyncDataStatus'
 import useNotifications from '@/composables/useNotifications'
+import { difference } from 'lodash'
 
 export default {
   components: { PostList, PostEditor },
@@ -17,6 +18,8 @@ export default {
   },
   setup () {
     const { addNotification } = useNotifications()
+
+    return { addNotification }
   },
   computed: {
     ...mapGetters('auth', ['authUser']),
@@ -38,17 +41,31 @@ export default {
     ...mapActions('users', ['fetchUsers']),
     savePost ({ post }) {
       this.createPost({ post: { ...post, threadId: this.thread.id } })
+    },
+    async fetchPostsWithUsers (ids) {
+      const posts = await this.fetchPosts({ ids: ids })
+      // fetch the posts associated users and the thread user.
+      const users = flatFilterValues(
+        posts.map(({ userId }) => userId).concat(this.thread.userId)
+      )
+      await this.fetchUsers({ ids: users })
     }
   },
   // using created to ensure the reactivity of the computed props, instead of beforeCreate hook.
   async created () {
-    const thread = await this.fetchThread({ id: this.threadId })
-    const posts = await this.fetchPosts({ ids: thread.posts })
-    // fetch the posts associated users and the thread user.
-    const users = flatFilterValues(
-      posts.map(({ userId }) => userId).concat(thread.userId)
-    )
-    await this.fetchUsers({ ids: users })
+    const thread = await this.fetchThread({
+      id: this.threadId,
+      cbOnSnapshot: ({ isLocal, item, previousItem }) => {
+        if (!this.asyncDataStatus_ready || isLocal) return // no notification if initial fetch or in same browser tab.
+
+        const newPostIds = difference(item.posts, previousItem.posts)
+        this.fetchPostsWithUsers(newPostIds)
+
+        this.addNotification({ message: 'Thread recently updated.' })
+      }
+    })
+
+    this.fetchPostsWithUsers(thread.posts)
 
     this.asyncDataStatus_fetched() // show content once data is fetched.
   }
