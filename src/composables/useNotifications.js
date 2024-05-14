@@ -10,6 +10,7 @@ const removeNotification = (id) => {
 
 const addNotification = ({ message, timeout }) => {
   const id = Math.random() + Date.now()
+
   notifications.push({
     id,
     message
