@@ -4,6 +4,7 @@ import PostEditor from '@/components/PostEditor.vue'
 import { mapActions, mapGetters } from 'vuex'
 import { flatFilterValues } from '@/helpers'
 import asyncDataStatus from '@/mixins/asyncDataStatus'
+import useNotifications from '@/composables/useNotifications'
 
 export default {
   components: { PostList, PostEditor },
@@ -13,6 +14,9 @@ export default {
       type: String,
       required: true
     }
+  },
+  setup () {
+    const { addNotification } = useNotifications()
   },
   computed: {
     ...mapGetters('auth', ['authUser']),
@@ -52,48 +56,44 @@ export default {
 </script>
 
 <template>
-  <div v-if="asyncDataStatus_ready" class="container">
-    <div class="col-large push-top">
-      <h1>
-        {{ thread.title }}
-        <router-link
-          v-if="canEditThread"
-          :to="{ name: 'ThreadEdit', params: { threadId: thread.id } }"
-          v-slot="{ navigate }"
-          class="btn-green btn-small"
-          ><button @click="navigate" role="link">
-            Edit Thread
-          </button></router-link
-        >
-      </h1>
-      <p>
-        By
-        <a href="#" class="link-unstyled">{{ thread.author?.name }}</a
-        >, <AppDate :timestamp="thread.publishedAt" />
-        <span
-          style="float: right; margin-top: 2px"
-          class="hide-mobile text-faded text-small"
-          >{{ thread.repliesCount }} repl{{
-            thread.repliesCount ? "ies" : "y"
-          }}
-          by {{ thread.contributorsCount }} contributor{{
-            thread.contributorsCount ? "s" : ""
-          }}</span
-        >
-      </p>
-      <PostList :posts="threadPosts" />
-      <PostEditor v-if="authUser.id" @save="savePost" />
-      <div v-else class="text-center">
-        <router-link :to="{ name: 'Login', query: { redirectTo: $route.path } }"
-          >Sign In</router-link
-        >
-        or
-        <router-link
-          :to="{ name: 'Register', query: { redirectTo: $route.path } }"
-          >Register</router-link
-        >
-        to edit and/or reply.
-      </div>
+  <div v-if="asyncDataStatus_ready" class="col-large push-top">
+    <h1>
+      {{ thread.title }}
+      <router-link
+        v-if="canEditThread"
+        :to="{ name: 'ThreadEdit', params: { threadId: thread.id } }"
+        v-slot="{ navigate }"
+        class="btn-green btn-small"
+        ><button @click="navigate" role="link">Edit Thread</button></router-link
+      >
+    </h1>
+    <p>
+      By
+      <a href="#" class="link-unstyled">{{ thread.author?.name }}</a
+      >, <AppDate :timestamp="thread.publishedAt" />
+      <span
+        style="float: right; margin-top: 2px"
+        class="hide-mobile text-faded text-small"
+        >{{ thread.repliesCount }} repl{{
+          thread.repliesCount ? "ies" : "y"
+        }}
+        by {{ thread.contributorsCount }} contributor{{
+          thread.contributorsCount ? "s" : ""
+        }}</span
+      >
+    </p>
+    <PostList :posts="threadPosts" />
+    <PostEditor v-if="authUser.id" @save="savePost" />
+    <div v-else class="text-center">
+      <router-link :to="{ name: 'Login', query: { redirectTo: $route.path } }"
+        >Sign In</router-link
+      >
+      or
+      <router-link
+        :to="{ name: 'Register', query: { redirectTo: $route.path } }"
+        >Register</router-link
+      >
+      to edit and/or reply.
     </div>
   </div>
 </template>

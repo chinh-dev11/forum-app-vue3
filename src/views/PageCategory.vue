@@ -37,7 +37,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="asyncDataStatus_ready" class="container">
+  <div v-if="asyncDataStatus_ready">
     <div class="col-full push-top">
       <h1>{{ category.name }}</h1>
     </div>

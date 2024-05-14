@@ -65,7 +65,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="asyncDataStatus_ready" class="container">
+  <div v-if="asyncDataStatus_ready">
     <div class="col-full push-top">
       <div class="forum-header">
         <div class="forum-details">
