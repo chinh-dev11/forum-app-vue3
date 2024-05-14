@@ -43,7 +43,14 @@ export default {
       this.createPost({ post: { ...post, threadId: this.thread.id } })
     },
     async fetchPostsWithUsers (ids) {
-      const posts = await this.fetchPosts({ ids: ids })
+      const posts = await this.fetchPosts({
+        ids,
+        cbOnSnapshot: ({ isLocal, previousItem }) => {
+          if (!this.asyncDataStatus_ready || isLocal || (previousItem?.edited && !previousItem?.edited?.at)) return // no notification if initial fetch or in same browser tab.
+
+          this.addNotification({ message: 'Thread recently updated.' })
+        }
+      })
       // fetch the posts associated users and the thread user.
       const users = flatFilterValues(
         posts.map(({ userId }) => userId).concat(this.thread.userId)
@@ -58,14 +65,17 @@ export default {
       cbOnSnapshot: ({ isLocal, item, previousItem }) => {
         if (!this.asyncDataStatus_ready || isLocal) return // no notification if initial fetch or in same browser tab.
 
-        const newPostIds = difference(item.posts, previousItem.posts)
-        this.fetchPostsWithUsers(newPostIds)
-
-        this.addNotification({ message: 'Thread recently updated.' })
+        const newPosts = difference(item.posts, previousItem.posts)
+        const hasNewPosts = newPosts.length > 0
+        if (hasNewPosts) {
+          this.fetchPostsWithUsers(newPosts)
+        } else {
+          this.addNotification({ message: 'Thread recently updated.' })
+        }
       }
     })
 
-    this.fetchPostsWithUsers(thread.posts)
+    await this.fetchPostsWithUsers(thread.posts)
 
     this.asyncDataStatus_fetched() // show content once data is fetched.
   }

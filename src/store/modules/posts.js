@@ -20,10 +20,10 @@ export default {
   actions: {
     fetchPost: ({ dispatch }, { id, emoji }) =>
       dispatch('fetchItem', { resource: 'posts', id, emoji }, { root: true }),
-    fetchPosts: ({ dispatch }, { ids }) =>
+    fetchPosts: ({ dispatch }, { ids, cbOnSnapshot = null }) =>
       dispatch(
         'fetchItems',
-        { resource: 'posts', ids, emoji: '🙂' },
+        { resource: 'posts', ids, emoji: '🙂', cbOnSnapshot },
         { root: true }
       ),
     updatePost: async ({ commit, state, rootState }, { id, text }) => {
