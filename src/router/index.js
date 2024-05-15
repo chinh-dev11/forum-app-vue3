@@ -10,29 +10,44 @@ import PageThreadEdit from '@/views/PageThreadEdit.vue'
 import UserRegister from '@/components/UserRegister.vue'
 import UserLogin from '@/components/UserLogin.vue'
 import store from '@/store'
+import { findById } from '@/helpers'
 
 const routes = [
   {
     name: 'Login',
     path: '/login',
-    component: UserLogin
+    component: UserLogin,
+    meta: { requiresGuest: true }
+  },
+  {
+    name: 'Logout',
+    path: '/logout',
+    async beforeEnter (to, from) {
+      await store.dispatch('auth/signOutUser')
+      return { name: 'Home' }
+    }
   },
   {
     name: 'Register',
     path: '/register',
-    component: UserRegister
+    component: UserRegister,
+    meta: { requiresGuest: true }
   },
   {
     name: 'ProfileEdit',
     path: '/me/edit',
     component: PageProfile,
-    props: { edit: true } // pass in 'edit' prop as boolean type (true/false).
+    props: { edit: true }, // pass in 'edit' prop as boolean type (true/false).
+    meta: { requiresAuth: true }
   },
   {
     name: 'Profile',
     path: '/me',
     component: PageProfile,
-    meta: { toTop: true, smothScroll: true } // scroll top smoothly. e.g. in case when editing profile.
+    meta: { toTop: true, smothScroll: true, requiresAuth: true } // scroll top smoothly. e.g. in case when editing profile.
+    // beforeEnter (to, from) {},
+    // beforeUpdate (to, from) {},
+    // beforeLeave (to, from) {}
   },
   {
     name: 'Category',
@@ -45,15 +60,14 @@ const routes = [
     name: 'Thread',
     path: '/thread/:threadId',
     component: PageThread,
-    props: true
-    // TODO: find a better solution of route guarding
-    /* beforeEnter (to, from, next) {
-      const threadExists = dataSource.threads.find(
-        (t) => t.id === to.params.id
-      )
+    props: true,
+    async beforeEnter (to, from, next) {
+      await store.dispatch('threads/fetchThread', { id: to.params.threadId, once: true })
+
+      const threadExists = findById(store.state.threads.items, to.params.threadId)
 
       if (threadExists) {
-        return next()
+        next()
       } else {
         next({
           name: 'NotFound',
@@ -62,19 +76,21 @@ const routes = [
           hash: to.hash
         })
       }
-    } */
+    }
   },
   {
     name: 'ThreadCreate',
     path: '/forum/:forumId/thread/create',
     component: PageThreadCreate,
-    props: true
+    props: true,
+    meta: { requiresAuth: true }
   },
   {
     name: 'ThreadEdit',
     path: '/thread/:threadId/edit',
     component: PageThreadEdit,
-    props: true
+    props: true,
+    meta: { requiresAuth: true }
   },
   { name: 'Home', path: '/', component: PageHome },
   { name: 'NotFound', path: '/:pathMatch(.*)*', component: PageNotFound }
@@ -94,8 +110,16 @@ const router = createRouter({
   }
 })
 
-router.beforeEach(() => {
+router.beforeEach(async (to, from) => {
   store.dispatch('unsubscribeAllSnapshots') // unregister Firestore realtime updates listeners when route changes.
+
+  await store.dispatch('auth/initAuthentication') // ensure authId is set before checking its value.
+
+  if (to.meta.requiresAuth && !store.state.auth.authId) {
+    return { name: 'Login', query: { redirectTo: to.path } } // unauthenticated user
+  }
+
+  if (to.meta.requiresGuest && store.state.auth.authId) return { name: 'Home' } // authenticated user
 })
 
 export default router

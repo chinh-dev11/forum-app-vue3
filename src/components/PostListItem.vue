@@ -1,6 +1,6 @@
 <script>
 import PostEditor from '@/components/PostEditor.vue'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -17,8 +17,11 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('auth', ['authUser']),
+    // ...mapGetters('users',['user']),
     user () {
-      return this.$store.getters.user(this.post.userId) || {}
+      return this.$store.getters['users/user'](this.post.userId) || {}
+      // return this.$store.getters.user(this.post.userId) || {}
     },
     // use writable computed to mutate prop
     editingMode: {
@@ -28,10 +31,13 @@ export default {
       set (val) {
         this.$emit('update:editing', val)
       }
+    },
+    canEditPost () {
+      return this.post.userId === this.authUser.id
     }
   },
   methods: {
-    ...mapActions(['updatePost']),
+    ...mapActions('posts', ['updatePost']),
     toggleEditMode (postId) {
       this.editingMode = this.editingMode === postId ? '' : postId
     },
@@ -64,6 +70,7 @@ export default {
         <p>{{ post.text }}</p>
       </div>
       <button
+      v-if="canEditPost"
         @click="toggleEditMode(post.id)"
         style="margin-left: auto"
         class="link-unstyled"

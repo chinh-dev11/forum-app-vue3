@@ -7,11 +7,9 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <div class="col-full push-top text-center">
-      <h1>Not Found!</h1>
-      <router-link :to="{ name: 'Home' }">To read the threads.</router-link>
-    </div>
+  <div class="col-full push-top text-center">
+    <h1>Not Found!</h1>
+    <router-link :to="{ name: 'Home' }">To read the threads.</router-link>
   </div>
 </template>
 

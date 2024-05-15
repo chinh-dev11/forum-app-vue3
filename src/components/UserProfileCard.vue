@@ -3,7 +3,7 @@ import { mapGetters } from 'vuex'
 
 export default {
   computed: {
-    ...mapGetters({ user: 'authUser' })
+    ...mapGetters('auth', { user: 'authUser' })
   }
 }
 </script>
@@ -43,6 +43,7 @@ export default {
     <p class="text-xsmall text-faded text-center">
       Member since <AppDate :timestamp="user.registeredAt" />, last visited
       <AppDate :timestamp="user.lastVisitAt" />
+      <!-- TODO: add lastVisitAt to the authUser store -->
     </p>
 
     <div class="text-center">

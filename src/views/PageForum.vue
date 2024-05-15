@@ -13,30 +13,59 @@ export default {
       required: true
     }
   },
+  data () {
+    return {
+      page: parseInt(this.$route.query.page) || 1,
+      perPage: 10
+    }
+  },
   computed: {
     forum () {
-      return findById(this.$store.state.forums, this.forumId)
+      return findById(this.$store.state.forums.items, this.forumId)
     },
     forumThreads () {
-      return this.forum.threads.map(threadId => this.$store.getters.thread(threadId))
+      if (!this.forum) return []
+
+      return this.$store.state.threads.items
+        .filter((thread) => thread.forumId === this.forum.id)
+        .map((thread) => this.$store.getters['threads/thread'](thread.id))
+    },
+    forumThreadsCount () {
+      return this.forum.threads.length
+    },
+    totalPage () {
+      if (!this.forumThreadsCount) return 0
+
+      return Math.ceil(this.forumThreadsCount / this.perPage)
     }
   },
   methods: {
-    ...mapActions(['fetchForum', 'fetchThreads', 'fetchUsers'])
+    ...mapActions('forums', ['fetchForum']),
+    ...mapActions('threads', ['fetchThreadsByPage']),
+    ...mapActions('users', ['fetchUsers'])
   },
   async created () {
     const forum = await this.fetchForum({ id: this.forumId })
-    const threads = await this.fetchThreads({ ids: forum.threads })
+    const threads = await this.fetchThreadsByPage({
+      ids: forum.threads,
+      page: this.page,
+      perPage: this.perPage
+    })
     const userIds = [...new Set(threads.map(({ userId }) => userId))]
     await this.fetchUsers({ ids: userIds })
 
     this.asyncDataStatus_fetched() // show content once data is fetched.
+  },
+  watch: {
+    async page (page) {
+      this.$router.push({ query: { page } })
+    }
   }
 }
 </script>
 
 <template>
-  <div v-if="asyncDataStatus_ready" class="container">
+  <div v-if="asyncDataStatus_ready">
     <div class="col-full push-top">
       <div class="forum-header">
         <div class="forum-details">
@@ -56,6 +85,7 @@ export default {
       </div>
     </div>
     <ThreadList :threads="forumThreads" />
+    <v-pagination v-model="page" :pages="totalPage" active-color="#57AD8D" />
   </div>
 </template>
 

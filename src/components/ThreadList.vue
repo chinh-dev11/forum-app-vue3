@@ -8,10 +8,10 @@ export default {
   },
   methods: {
     userById (userId) {
-      return this.$store.getters.user(userId)
+      return this.$store.getters['users/user'](userId)
     },
     threadById (threadId) {
-      return this.$store.getters.thread(threadId)
+      return this.$store.getters['threads/thread'](threadId)
     }
   }
 }

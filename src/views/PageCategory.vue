@@ -15,16 +15,17 @@ export default {
   },
   computed: {
     category () {
-      return findById(this.$store.state.categories, this.catId)
+      return findById(this.$store.state.categories.items, this.catId)
     },
     categoryForums () {
-      return this.$store.state.forums.filter(
+      return this.$store.state.forums.items.filter(
         ({ categoryId }) => categoryId === this.category.id
       )
     }
   },
   methods: {
-    ...mapActions(['fetchCategory', 'fetchForums'])
+    ...mapActions('categories', ['fetchCategory']),
+    ...mapActions('forums', ['fetchForums'])
   },
   async created () {
     const category = await this.fetchCategory({ id: this.catId })
@@ -36,7 +37,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="asyncDataStatus_ready" class="container">
+  <div v-if="asyncDataStatus_ready">
     <div class="col-full push-top">
       <h1>{{ category.name }}</h1>
     </div>
