@@ -6,7 +6,6 @@ import {
   signOut,
   createUserWithEmailAndPassword
 } from 'firebase/auth'
-import { auth, db } from '@/firebase'
 import {
   query,
   collection,
@@ -16,6 +15,8 @@ import {
   startAfter,
   limit
 } from 'firebase/firestore'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { auth, db, storage } from '@/firebase'
 
 export default {
   namespaced: true,
@@ -152,11 +153,18 @@ export default {
           user.email,
           user.password
         )
-        const userCredentialUid = userCredential.user?.uid
 
-        if (!userCredentialUid) return null
+        user.id = userCredential.user?.uid
 
-        user.id = userCredentialUid
+        if (!user.id) return null
+
+        if (user.avatar) {
+          const imagesRef = ref(storage, `uploads/${user.id}/images/${Date.now()}-${user.avatar.name}`)
+          const snapshot = await uploadBytes(imagesRef, user.avatar)
+          const bucket = `gs://${snapshot.metadata.bucket}/${snapshot.metadata.fullPath}`
+          const bucketRef = ref(storage, bucket)
+          user.avatar = await getDownloadURL(bucketRef)
+        }
 
         return await dispatch('users/createUser', user, { root: true }) // add user to Firestore and local store
       } catch (error) {

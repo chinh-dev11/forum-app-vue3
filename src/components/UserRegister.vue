@@ -4,6 +4,7 @@ import { mapActions } from 'vuex'
 export default {
   data () {
     return {
+      avatarPreview: null,
       form: {
         name: '',
         username: '',
@@ -14,7 +15,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions('users', ['registerUserWithEmailAndPassword', 'signInUserWithGoogle']),
+    ...mapActions('auth', [
+      'registerUserWithEmailAndPassword',
+      'signInUserWithGoogle'
+    ]),
     async signUpWithGoogle () {
       const user = await this.signInUserWithGoogle()
 
@@ -40,6 +44,15 @@ export default {
         console.error(user.error)
         // TODO: manage error
       }
+    },
+    handleImageUpload (e) {
+      this.form.avatar = e.target.files[0]
+
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        this.avatarPreview = event.target.result
+      }
+      reader.readAsDataURL(this.form.avatar)
     }
   },
   created () {
@@ -54,7 +67,6 @@ export default {
       <div class="col-2">
         <form @submit.prevent="register" class="card card-form">
           <h1 class="text-center">Register</h1>
-
           <div class="form-group">
             <label for="name">Full Name</label>
             <input
@@ -64,7 +76,6 @@ export default {
               class="form-input"
             />
           </div>
-
           <div class="form-group">
             <label for="username">Username</label>
             <input
@@ -75,7 +86,6 @@ export default {
               autocomplete="username"
             />
           </div>
-
           <div class="form-group">
             <label for="email">Email</label>
             <input
@@ -85,7 +95,6 @@ export default {
               class="form-input"
             />
           </div>
-
           <div class="form-group">
             <label for="password">Password</label>
             <input
@@ -96,17 +105,26 @@ export default {
               autocomplete="current-password"
             />
           </div>
-
           <div class="form-group">
-            <label for="avatar">Avatar</label>
+            <label for="avatar">
+              Avatar
+              <div v-if="avatarPreview">
+                <img
+                  :src="avatarPreview"
+                  class="avatar-xlarge"
+                  alt="user pic"
+                />
+              </div>
+            </label>
             <input
-              v-model="form.avatar"
+              v-show="!avatarPreview"
+              @change="handleImageUpload"
+              type="file"
+              accept="image/*"
               id="avatar"
-              type="text"
               class="form-input"
             />
           </div>
-
           <div class="form-actions">
             <button type="submit" class="btn-blue btn-block">Register</button>
           </div>
