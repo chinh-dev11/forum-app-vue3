@@ -45,7 +45,7 @@ export default {
         // TODO: manage error
       }
     },
-    handleImageUpload (e) {
+    handleAvatarUpload (e) {
       this.form.avatar = e.target.files[0]
 
       const reader = new FileReader()
@@ -118,7 +118,7 @@ export default {
             </label>
             <input
               v-show="!avatarPreview"
-              @change="handleImageUpload"
+              @change="handleAvatarUpload"
               type="file"
               accept="image/*"
               id="avatar"

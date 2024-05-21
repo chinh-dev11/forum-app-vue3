@@ -159,17 +159,24 @@ export default {
         if (!user.id) return null
 
         if (user.avatar) {
-          const imagesRef = ref(storage, `uploads/${user.id}/images/${Date.now()}-${user.avatar.name}`)
-          const snapshot = await uploadBytes(imagesRef, user.avatar)
-          const bucket = `gs://${snapshot.metadata.bucket}/${snapshot.metadata.fullPath}`
-          const bucketRef = ref(storage, bucket)
-          user.avatar = await getDownloadURL(bucketRef)
+          user.avatar = await dispatch('uploadAvatar', { authId: user.id, file: user.avatar })
         }
 
         return await dispatch('users/createUser', user, { root: true }) // add user to Firestore and local store
       } catch (error) {
         return { error }
       }
+    },
+    uploadAvatar: async ({ state }, { authId, file }) => {
+      if (!file) return null
+
+      authId = authId || state.authId
+      const imagesRef = ref(storage, `uploads/${authId}/images/${Date.now()}-${file.name}`)
+      const snapshot = await uploadBytes(imagesRef, file)
+      const bucket = `gs://${snapshot.metadata.bucket}/${snapshot.metadata.fullPath}`
+      const bucketRef = ref(storage, bucket)
+      const url = await getDownloadURL(bucketRef)
+      return url
     },
     // ------ Memory leaks, performance issues.
     // unsubscribe Firestore realtime updates listeners (onSnapshot).

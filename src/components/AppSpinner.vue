@@ -1,5 +1,12 @@
 <script>
-export default {}
+export default {
+  props: {
+    color: {
+      type: String,
+      default: '#263959'
+    }
+  }
+}
 </script>
 
 <template>
@@ -11,8 +18,7 @@ export default {}
   width: 40px;
   height: 40px;
   margin: 100px auto;
-  background-color: #263959;
-
+  background-color: v-bind(color);
   border-radius: 100%;
   -webkit-animation: sk-scaleout 1s infinite ease-in-out;
   animation: sk-scaleout 1s infinite ease-in-out;

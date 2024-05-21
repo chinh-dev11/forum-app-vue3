@@ -1,5 +1,6 @@
 <script>
 import { mapActions } from 'vuex'
+import AppSpinner from './AppSpinner.vue'
 
 export default {
   props: {
@@ -10,6 +11,7 @@ export default {
   },
   data () {
     return {
+      uploadingImage: false,
       activeUser: {
         ...this.user
       }
@@ -17,6 +19,13 @@ export default {
   },
   methods: {
     ...mapActions('users', ['updateUser']),
+    ...mapActions('auth', ['uploadAvatar']),
+    async handleAvatarUpload (e) {
+      this.uploadingImage = true
+      const file = e.target.files[0]
+      this.activeUser.avatar = await this.uploadAvatar({ file })
+      this.uploadingImage = false
+    },
     save () {
       const userUpdated = this.updateUser({ ...this.activeUser }) // clone the activeUser object: to prevent changes referenced to it before it's actually set to the users.
       this.$router.push({ name: 'Profile' }) // redirect to the profile page after save.
@@ -36,12 +45,25 @@ export default {
 <template>
   <div class="col-3 push-top">
     <form @submit.prevent="save" class="profile-card">
-      <p class="text-center">
-        <img
-          :src="user.avatar"
-          :alt="`${user.name} profile picture`"
-          class="avatar-xlarge img-update"
-        />
+      <p class="text-center avatar-edit">
+        <label for="avatar">
+          <img
+            :src="activeUser.avatar"
+            :alt="`${activeUser.name} profile picture`"
+            class="avatar-xlarge img-update"
+          />
+          <div class="avatar-upload-overlay">
+            <AppSpinner v-if="uploadingImage" color="black" />
+            <FA v-else icon="fa-camera" size="3x" :style="{ opacity: '0.8' }" />
+          </div>
+          <input
+            v-show="false"
+            @change="handleAvatarUpload"
+            type="file"
+            accept="image/* "
+            id="avatar"
+          />
+        </label>
       </p>
       <div class="form-group">
         <input
@@ -69,8 +91,8 @@ export default {
         ></textarea>
       </div>
       <div class="stats">
-        <span>{{ user.postsCount }} posts</span>
-        <span>{{ user.threadsCount }} threads</span>
+        <span>{{ activeUser.postsCount }} posts</span>
+        <span>{{ activeUser.threadsCount }} threads</span>
       </div>
       <hr />
       <div class="form-group">
@@ -101,7 +123,7 @@ export default {
         />
       </div>
       <div class="btn-group space-between">
-        <button @click="cancel" class="btn-ghost">Cancel</button>
+        <button @click.prevent="cancel" class="btn-ghost">Cancel</button>
         <button type="submit" class="btn-blue">Save</button>
       </div>
     </form>
@@ -198,4 +220,14 @@ export default {
     </div> -->
 </template>
 
-<style scoped></style>
+<style scoped>
+.avatar-edit {
+  position: relative;
+}
+.avatar-edit .avatar-upload-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+</style>

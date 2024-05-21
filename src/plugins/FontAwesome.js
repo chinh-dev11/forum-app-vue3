@@ -5,7 +5,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 /* import the fontawesome icons */
-import { faPencil } from '@fortawesome/free-solid-svg-icons'
+import { faPencil, faCamera } from '@fortawesome/free-solid-svg-icons'
 // import { fas } from '@fortawesome/free-solid-svg-icons' // import all of icons
 
 /* import specific icons */
@@ -13,7 +13,7 @@ import { faPencil } from '@fortawesome/free-solid-svg-icons'
 
 /* add icons to the library */
 // library.add(...all)
-library.add(faPencil)
+library.add(faPencil, faCamera)
 // library.add(fas) // all of icons
 
 // default exportable: a function or an object

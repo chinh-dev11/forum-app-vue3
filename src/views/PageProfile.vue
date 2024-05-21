@@ -49,7 +49,7 @@ export default {
 </script>
 
 <template>
-  <div class="flex-grid">
+  <div v-if="user" class="flex-grid">
     <div class="col-3 push-top">
       <UserProfileCardEditor v-if="edit" :user="user" />
       <UserProfileCard v-else :user="user" />
