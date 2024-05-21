@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { auth, db, storage } from '@/firebase'
+import useNotifications from '@/composables/useNotifications'
 
 export default {
   namespaced: true,
@@ -171,12 +172,19 @@ export default {
       if (!file) return null
 
       authId = authId || state.authId
-      const imagesRef = ref(storage, `uploads/${authId}/images/${Date.now()}-${file.name}`)
-      const snapshot = await uploadBytes(imagesRef, file)
-      const bucket = `gs://${snapshot.metadata.bucket}/${snapshot.metadata.fullPath}`
-      const bucketRef = ref(storage, bucket)
-      const url = await getDownloadURL(bucketRef)
-      return url
+
+      try {
+        const imagesRef = ref(storage, `uploads/${authId}/images/${Date.now()}-${file.name}`)
+        const snapshot = await uploadBytes(imagesRef, file)
+        const bucket = `gs://${snapshot.metadata.bucket}/${snapshot.metadata.fullPath}`
+        const bucketRef = ref(storage, bucket)
+        const url = await getDownloadURL(bucketRef)
+        return url
+      } catch (err) {
+        const { addNotification } = useNotifications()
+        addNotification({ message: 'Error uploading avatar image!', type: 'error' })
+        return null
+      }
     },
     // ------ Memory leaks, performance issues.
     // unsubscribe Firestore realtime updates listeners (onSnapshot).

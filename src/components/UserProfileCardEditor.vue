@@ -23,7 +23,8 @@ export default {
     async handleAvatarUpload (e) {
       this.uploadingImage = true
       const file = e.target.files[0]
-      this.activeUser.avatar = await this.uploadAvatar({ file })
+      const uploadedAvatar = await this.uploadAvatar({ file })
+      this.activeUser.avatar = uploadedAvatar || this.activeUser.avatar
       this.uploadingImage = false
     },
     save () {
@@ -60,7 +61,7 @@ export default {
             v-show="false"
             @change="handleAvatarUpload"
             type="file"
-            accept="image/* "
+            accept="image/*"
             id="avatar"
           />
         </label>

@@ -17,6 +17,7 @@ export default {
         v-for="notification in notifications"
         :key="notification.id"
         class="notification"
+        :class="`notification-type-${notification.type}`"
       >
         <span>{{ notification.message }}</span>
         <button @click="removeNotification(notification.id)">x</button>
@@ -41,6 +42,9 @@ export default {
   padding: 10px 20px;
   border-left: 5px solid #263959;
 }
+.notification.notification-type-error {
+  border-left: 5px solid rgb(146, 5, 5);
+}
 
 /* Transition */
 .notification-enter-active,
@@ -53,6 +57,6 @@ export default {
   transform: translateX(100%);
 }
 .notification-move {
-    transition:transform 0.8s ease;
+  transition: transform 0.8s ease;
 }
 </style>

@@ -8,12 +8,13 @@ const removeNotification = (id) => {
   notifications.splice(index, 1)
 }
 
-const addNotification = ({ message, timeout }) => {
+const addNotification = ({ message, timeout, type = 'info' }) => {
   const id = Math.random() + Date.now()
 
   notifications.push({
     id,
-    message
+    message,
+    type
   })
 
   if (timeout) {
