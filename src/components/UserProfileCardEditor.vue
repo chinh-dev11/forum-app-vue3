@@ -1,6 +1,5 @@
 <script>
 import { mapActions } from 'vuex'
-import AppSpinner from './AppSpinner.vue'
 
 export default {
   props: {
@@ -45,13 +44,19 @@ export default {
 
 <template>
   <div class="col-3 push-top">
+    {{ activeUser.avatar }}
     <form @submit.prevent="save" class="profile-card">
       <p class="text-center avatar-edit">
         <label for="avatar">
-          <img
-            :src="activeUser.avatar"
+          <!-- <img
+            :src="activeUser.avatar || '/user-placeholder.png'"
             :alt="`${activeUser.name} profile picture`"
             class="avatar-xlarge img-update"
+          /> -->
+          <AppAvatarImg
+            :avatar="activeUser.avatar"
+            :name="activeUser.name"
+            size="xlarge"
           />
           <div class="avatar-upload-overlay">
             <AppSpinner v-if="uploadingImage" color="black" />

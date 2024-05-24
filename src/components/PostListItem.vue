@@ -3,9 +3,7 @@ import PostEditor from '@/components/PostEditor.vue'
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
-  components: {
-    PostEditor
-  },
+  components: { PostEditor },
   props: {
     post: {
       type: Object,
@@ -55,7 +53,7 @@ export default {
     <div class="user-info">
       <a href="#" class="user-name">{{ user.name }}</a>
       <a href="#">
-        <img class="avatar-large" :src="user.avatar" alt="" />
+        <AppAvatarImg :src="user.avatar" :alt="user.name" />
       </a>
       <p class="desktop-only text-small">
         {{ `${user.postsCount} post${user.postsCount ? "s" : ""}` }}
@@ -69,15 +67,16 @@ export default {
       <div v-else>
         <p>{{ post.text }}</p>
       </div>
-      <button
-      v-if="canEditPost"
+      <a
+        v-if="canEditPost"
+        href="#"
         @click="toggleEditMode(post.id)"
         style="margin-left: auto"
         class="link-unstyled"
         title="Make a change"
       >
         <i><FA icon="fa-pencil" /></i>
-      </button>
+      </a>
     </div>
     <div class="post-date text-faded">
       <div v-if="post.edited?.at" class="edition-info">edited!</div>

@@ -36,8 +36,14 @@ export default {
           </p>
         </div>
         <div class="activity">
-          <p class="replies-count">{{ threadById(thread.id).repliesCount }} replies</p>
-          <img class="avatar-medium" :src="userById(thread.userId).avatar" alt="" />
+          <p class="replies-count">
+            {{ threadById(thread.id).repliesCount }} replies
+          </p>
+          <AppAvatarImg
+            :src="userById(thread.userId).avatar"
+            :alt="userById(thread.userId).name"
+            size="medium"
+          />
           <div>
             <p class="text-xsmall">
               <a href="profile.html">{{ userById(thread.userId).name }}</a>

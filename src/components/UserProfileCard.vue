@@ -4,6 +4,9 @@ import { mapGetters } from 'vuex'
 export default {
   computed: {
     ...mapGetters('auth', { user: 'authUser' })
+  },
+  created () {
+    console.log(this.user)
   }
 }
 </script>
@@ -11,11 +14,7 @@ export default {
 <template>
   <div class="profile-card">
     <p class="text-center">
-      <img
-        :src="user.avatar"
-        :alt="`${user.name} profile picture`"
-        class="avatar-xlarge"
-      />
+      <AppAvatarImg :src="user.avatar" :alt="user.name" size="xlarge" />
     </p>
 
     <h1 class="title">{{ user.username }}</h1>

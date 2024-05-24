@@ -56,10 +56,11 @@ export default {
             @click.prevent="userDropdownOpen = !userDropdownOpen"
             v-click-outside="() => (userDropdownOpen = false)"
             href="#"
-            ><img
-              class="avatar-small"
+          >
+            <AppAvatarImg
               :src="authUser.avatar"
-              :alt="`${authUser.name} profile picture`" />
+              :alt="authUser.name"
+              size="small" />
             <span>
               {{ authUser.name }}
               <img
