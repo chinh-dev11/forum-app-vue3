@@ -1,10 +1,11 @@
 <script>
 import { mapActions } from 'vuex'
-import { Form, Field } from 'vee-validate'
+import { Form, Field, ErrorMessage } from 'vee-validate'
 export default {
   components: {
     VeeForm: Form,
-    VeeField: Field
+    VeeField: Field,
+    VeeErrorMessage: ErrorMessage
   },
   data () {
     return {
@@ -57,6 +58,10 @@ export default {
         this.avatarPreview = event.target.result
       }
       reader.readAsDataURL(this.form.avatar)
+    },
+    required (value) {
+      if (value && value.trim()) return true
+      return 'This is required'
     }
   },
   created () {
@@ -69,36 +74,24 @@ export default {
   <div class="container">
     <div class="flex-grid justify-center">
       <div class="col-2">
-        <VeeForm
-          @submit="register"
-          class="card card-form"
-          :validation-schema="{
-            name: (value) => {
-              console.log('name', name);
-              if (value && value.trim()) return true;
-              return 'This is required';
-            },
-            useranme: (value) => {
-              console.log('username', username);
-              if (value && value.trim()) return true;
-              return 'This is required';
-            },
-          }"
-        >
+        <VeeForm @submit="register" class="card card-form">
           <h1 class="text-center">Register</h1>
           <div class="form-group">
             <label for="name">Full Name</label>
             <VeeField
+              :rules="required"
               name="name"
               v-model="form.name"
               id="name"
               type="text"
               class="form-input"
             />
+            <VeeErrorMessage name="name" class="form-error" />
           </div>
           <div class="form-group">
             <label for="username">Username</label>
             <VeeField
+              :rules="required"
               name="username"
               v-model="form.username"
               id="username"
@@ -106,6 +99,7 @@ export default {
               class="form-input"
               autocomplete="username"
             />
+            <VeeErrorMessage name="username" class="form-error" />
           </div>
           <div class="form-group">
             <label for="email">Email</label>
