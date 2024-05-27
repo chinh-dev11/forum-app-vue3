@@ -70,13 +70,23 @@ export default {
             <label for="email">Email</label>
             <VeeField
               name="email"
-              rules="required"
+              rules="required|email"
               v-model="form.email"
               id="email"
               type="text"
               class="form-input"
               autocomplete="email"
             />
+            <!-- OR -->
+            <!-- <VeeField
+              name="email"
+              :rules="{ required: true, email: true }"
+              v-model="form.email"
+              id="email"
+              type="text"
+              class="form-input"
+              autocomplete="email"
+            /> -->
             <VeeErrorMessage name="email" class="form-error" />
           </div>
           <div class="form-group">
