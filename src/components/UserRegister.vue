@@ -1,12 +1,7 @@
 <script>
 import { mapActions } from 'vuex'
-import { Form, Field, ErrorMessage } from 'vee-validate'
+
 export default {
-  components: {
-    VeeForm: Form,
-    VeeField: Field,
-    VeeErrorMessage: ErrorMessage
-  },
   data () {
     return {
       avatarPreview: null,
@@ -58,10 +53,6 @@ export default {
         this.avatarPreview = event.target.result
       }
       reader.readAsDataURL(this.form.avatar)
-    },
-    required (value) {
-      if (value && value.trim()) return true
-      return 'This is required'
     }
   },
   created () {
@@ -79,8 +70,8 @@ export default {
           <div class="form-group">
             <label for="name">Full Name</label>
             <VeeField
-              :rules="required"
               name="name"
+              rules="required"
               v-model="form.name"
               id="name"
               type="text"
@@ -91,8 +82,8 @@ export default {
           <div class="form-group">
             <label for="username">Username</label>
             <VeeField
-              :rules="required"
               name="username"
+              rules="required"
               v-model="form.username"
               id="username"
               type="text"
