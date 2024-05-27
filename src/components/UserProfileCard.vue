@@ -4,9 +4,6 @@ import { mapGetters } from 'vuex'
 export default {
   computed: {
     ...mapGetters('auth', { user: 'authUser' })
-  },
-  created () {
-    console.log(this.user)
   }
 }
 </script>

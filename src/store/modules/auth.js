@@ -168,13 +168,14 @@ export default {
         return { error }
       }
     },
-    uploadAvatar: async ({ state }, { authId, file }) => {
+    uploadAvatar: async ({ state }, { authId, file, filename }) => {
       if (!file) return null
 
       authId = authId || state.authId
+      filename = filename || file.name
 
       try {
-        const imagesRef = ref(storage, `uploads/${authId}/images/${Date.now()}-${file.name}`)
+        const imagesRef = ref(storage, `uploads/${authId}/images/${Date.now()}-${filename}`)
         const snapshot = await uploadBytes(imagesRef, file)
         const bucket = `gs://${snapshot.metadata.bucket}/${snapshot.metadata.fullPath}`
         const bucketRef = ref(storage, bucket)

@@ -28,7 +28,16 @@ export default {
       this.activeUser.avatar = uploadedAvatar || this.activeUser.avatar
       this.uploadingImage = false
     },
-    save () {
+    async handleRandomAvatarUpload () {
+      const randomAvatarGenerated = this.activeUser.avatar.startsWith('https://pixabay')
+      if (randomAvatarGenerated) {
+        const image = await fetch(this.activeUser.avatar)
+        const blob = await image.blob()
+        this.activeUser.avatar = await this.uploadAvatar({ file: blob, filename: 'random' })
+      }
+    },
+    async save () {
+      await this.handleRandomAvatarUpload()
       const userUpdated = this.updateUser({ ...this.activeUser }) // clone the activeUser object: to prevent changes referenced to it before it's actually set to the users.
       this.$router.push({ name: 'Profile' }) // redirect to the profile page after save.
 
