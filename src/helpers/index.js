@@ -60,7 +60,13 @@ const makeFetchItemsAction = ({ resource }) => {
     dispatch('fetchItems', { resource, ...payload }, { root: true })
 }
 
+const arrayRandom = (arr) => {
+  const randomIndex = Math.floor(Math.random() * arr.length)
+  return arr[randomIndex]
+}
+
 export {
+  arrayRandom,
   makeFetchItemAction,
   makeFetchItemsAction,
   makeAppendChildToParentMutation,

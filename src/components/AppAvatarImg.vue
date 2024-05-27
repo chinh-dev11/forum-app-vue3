@@ -21,8 +21,12 @@ export default {
   <img
     :src="src || '/user-placeholder.png'"
     :alt="`${alt} profile picture`"
-    :class="`avatar-${size} img-update`"
+    :class="`avatar-${size}`"
   />
 </template>
 
-<style lang="scss" scoped></style>
+<style scoped>
+img {
+  object-fit: cover;
+}
+</style>

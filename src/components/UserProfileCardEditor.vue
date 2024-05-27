@@ -1,7 +1,9 @@
 <script>
 import { mapActions } from 'vuex'
+import UserProfileCardEditorRandomAvatar from './UserProfileCardEditorRandomAvatar.vue'
 
 export default {
+  components: { UserProfileCardEditorRandomAvatar },
   props: {
     user: {
       type: Object,
@@ -44,23 +46,17 @@ export default {
 
 <template>
   <div class="col-3 push-top">
-    {{ activeUser.avatar }}
     <form @submit.prevent="save" class="profile-card">
       <p class="text-center avatar-edit">
         <label for="avatar">
-          <!-- <img
-            :src="activeUser.avatar || '/user-placeholder.png'"
-            :alt="`${activeUser.name} profile picture`"
-            class="avatar-xlarge img-update"
-          /> -->
           <AppAvatarImg
-            :avatar="activeUser.avatar"
-            :name="activeUser.name"
+            :src="activeUser.avatar"
+            :alt="activeUser.name"
             size="xlarge"
           />
           <div class="avatar-upload-overlay">
             <AppSpinner v-if="uploadingImage" color="black" />
-            <FA v-else icon="fa-camera" size="3x" :style="{ opacity: '0.8' }" />
+            <FA v-else icon="fa-camera" size="3x" class="icon-camera" />
           </div>
           <input
             v-show="false"
@@ -71,6 +67,7 @@ export default {
           />
         </label>
       </p>
+      <UserProfileCardEditorRandomAvatar @hit="activeUser.avatar = $event" />
       <div class="form-group">
         <input
           v-model="activeUser.username"
@@ -235,5 +232,13 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+.icon-camera {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  opacity: 0.6;
+  border-radius: 50%;
+  padding: 6px;
 }
 </style>
