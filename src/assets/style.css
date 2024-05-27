@@ -2244,4 +2244,5 @@ hr {
 #app {
     background: #F5F8FE;
     min-height: 100vh;
+    min-width: 576px;
 }
